@@ -45,7 +45,7 @@ function createUrlLangRegExpsObj(languageCodes) {
 const urlLangRegExps = createUrlLangRegExpsObj(langCodes);
 
 // According to the available languages of the web site.
-// Last one should be the default language.
+// Last one should be the default language, which corresponds to the url without lang code.
 function getUrlLang() {
   const websitePath = window.location.pathname;
   if (urlLangRegExps.es.test(websitePath)) {
@@ -105,8 +105,6 @@ if (getBrowserLang() !== undefined && getBrowserLang() !== getUrlLang()) {
   const changeLangContainer = document.getElementById('changeLangContainer');
   changeLangContainer.style.display = "block"; // TODO add a class that has opacity with transition.
   changeLangContainer.innerHTML = `<a href="${newUrl}">View the site in ${getBrowserLang()}</a>`;
+} else if (getBrowserLang() === undefined) {
+  console.warn("Sorry but we don't have our website in your browser's language.");
 }
-
-
-// TESTS
-// What happens if the site is in english (default lang) or any other lang and the browser is in a not supported language?
