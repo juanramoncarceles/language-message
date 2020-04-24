@@ -1,9 +1,9 @@
-// This script works by checking the value of the language code found in the url of the current web page against the language set on the browser.
-// The language code on the url of the site should be placed after the origin and at the begining of the path: www.example.com/LANG/rest/of/the/path
-// The default site language is considered English without any code.
+// This script works by checking the value of the language code found in the current url (window.location) against the language set on the browser.
+// The language code in the url of the site is expected to be located after the origin and at the begining of the path: www.example.com/LANG/rest/of/the/path
+// The default site language in this case is considered English, without any lang code in the url.
 
 /**
- * Website language code values used in the url.
+ * Website language codes used in the url.
  * Set the language codes used as the values of the entries.
  */
 const langCodes = {
@@ -17,7 +17,8 @@ const langCodes = {
 }
 
 
-// Regular expressions according to the official language codes for the browsers.
+// Regular expressions according to the Official Language Codes for the browsers.
+// Create only the ones available in the website.
 const browserLangRegExps = {
   es: new RegExp(/^es-{0,1}/),
   fr: new RegExp(/^fr-{0,1}/),
@@ -44,7 +45,7 @@ function createUrlLangRegExpsObj(languageCodes) {
 const urlLangRegExps = createUrlLangRegExpsObj(langCodes);
 
 // According to the available languages of the web site.
-// Last one is the default language.
+// Last one should be the default language.
 function getUrlLang() {
   const websitePath = window.location.pathname;
   if (urlLangRegExps.es.test(websitePath)) {
@@ -65,7 +66,7 @@ function getUrlLang() {
 }
 
 /**
- * It checks if the browser has a language that the website supports,
+ * Checks if the browser has a language that the website supports,
  * otherwise it returns undefined.
  */
 function getBrowserLang() {
@@ -90,16 +91,16 @@ function getBrowserLang() {
 }
 
 
-// Check if a redirection could be necessary.
-// If the browser lang is undefined it means that we have no website language that can match so nothing is done.
-// If there is a supported browser language and it is different than the one on the current website then ...
-if (getBrowserLang() !== undefined && getUrlLang() !== getBrowserLang()) {
+// Here is checked if a redirection could be necessary.
+// If the getBrowserLang returns undefined it means that we have no website language that can match, so nothing is done.
+// If there is a supported browser language and it is different than the one on the current website then offer the website with the browser lang.
+if (getBrowserLang() !== undefined && getBrowserLang() !== getUrlLang()) {
   let newUrl;
-  if (getUrlLang() === langCodes.en) { // If it was the default lang then only add the new one to the path.
+  if (getUrlLang() === langCodes.en) { // If the url had the default lang (english) then only add the browser one at the beginning of the path.
     newUrl = window.location.origin + "/" + getBrowserLang() + window.location.pathname;
-  } else { // If there was another lang then replace it.
+  } else { // If the url had another language, then replace it by the one of the browser.
     const urlPathname = window.location.pathname.match(/^\/[a-z-]+(\/.+)/);
-    newUrl = window.location.origin + "/" + getBrowserLang() + (urlPathname !== null ? urlPathname[1] : '');
+    newUrl = window.location.origin + (getBrowserLang() !== langCodes.en ? "/" + getBrowserLang() : '') + (urlPathname !== null ? urlPathname[1] : '');
   }
   const changeLangContainer = document.getElementById('changeLangContainer');
   changeLangContainer.style.display = "block"; // TODO add a class that has opacity with transition.
@@ -108,4 +109,4 @@ if (getBrowserLang() !== undefined && getUrlLang() !== getBrowserLang()) {
 
 
 // TESTS
-// What happens if the site is in english (default lang) and the browser in a not supported language.
+// What happens if the site is in english (default lang) or any other lang and the browser is in a not supported language?
