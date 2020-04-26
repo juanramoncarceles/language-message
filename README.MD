@@ -1,12 +1,10 @@
 # INSTRUCTIONS
 
 Serve the folder files with a server.
+To test there is one index.html in the root folder and three more inside language folders: /es/index.html, /it/index.html and /zh-hans/index.html.
 
-Open localhost, if your browser is in inglish nothing will be suggested, because the plain url without lang code correspond to the english version
+Open http://localhost/index.html which corresponds to the default language (English).
+If the browser language is English no link will appear, but if it is in another language supported by the website a link will appear suggesting it.
 
-however if the browser is set to another language like spanish a link will appear to redirect to the spanish version.
-
-
-there are three index.html test files under lang folders to test it.
-
-For example open localhost/zh-hans/index.html and if your browser is not in chinese a link will be shown with the link to the website in your browser's lang.
+Open http://localhost/zh-hans/index.html which corresponds to the Chinese website.
+If the browser is not in Chinese then it will suggest to go the browser's language in case it is supported by the website.

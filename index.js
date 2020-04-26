@@ -9,43 +9,43 @@
  * ADD THE AVAILABLE LANGUAGES ON THE WEBSITE TO THIS ARRAY OF LANGUAGE OBJECTS.
  * For each language object set:
  * * 'urlCode': lang code used in the website url. Leave as an empty string for language that corresponds to the url without any code (default language).
- * * 'browserCode': the beginning of the official browser lang code until the dash (included). https://www.metamodpro.com/browser-language-codes
+ * * 'browserCode': the two first characters of the official browser lang code. https://www.metamodpro.com/browser-language-codes
  * * 'sentence': string to be displayed to the user suggesting to change to that language.
  */
 const langCodes = [
   {
     urlCode: 'es',
-    browserCode: 'es-',
+    browserCode: 'es',
     sentence: 'Ver en Español'
   },
   {
     urlCode: 'fr',
-    browserCode: 'fr-',
+    browserCode: 'fr',
     sentence: 'Voir en Français'
   },
   {
     urlCode: 'it',
-    browserCode: 'it-',
+    browserCode: 'it',
     sentence: 'Vedere in Italiano'
   },
   {
     urlCode: 'de',
-    browserCode: 'de-',
+    browserCode: 'de',
     sentence: 'Ansicht auf Deutsch'
   },
   {
     urlCode: 'zh-hans',
-    browserCode: 'zh-',
+    browserCode: 'zh',
     sentence: '用中文查看'
   },
   {
     urlCode: 'ko',
-    browserCode: 'ko-',
+    browserCode: 'ko',
     sentence: '한국어로보기'
   },
   {
     urlCode: '',
-    browserCode: 'en-',
+    browserCode: 'en',
     sentence: 'View in English'
   }
 ];
@@ -76,7 +76,7 @@ function getUrlLangIndex() {
 function getBrowserLangIndex() {
   const browserLang = navigator.language || navigator.userLanguage;
   return langCodes.findIndex(lang => {
-    const langRegExp = new RegExp('^' + lang.browserCode + '{0,1}');
+    const langRegExp = new RegExp('^' + lang.browserCode);
     return langRegExp.test(browserLang);
   });
 }
