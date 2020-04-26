@@ -1,1 +1,9 @@
 ☐ Add cookies
+  If the user clicks on the link, then the language on the link is stored as 'preferredLang'
+  Next time if the website url is not in that language it will be redirected automatically.
+
+  If the user clicks on 'Don't ask me again', a cookie is stored dontAskLang=true so this doens't run.
+
+  If the user clicks the cross nothing happens, just the tip is closed.
+
+  document.cookie = "dontAskLang=true;preferredLang=es";

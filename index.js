@@ -99,8 +99,11 @@ if (getBrowserLangIndex() !== -1 && getBrowserLangIndex() !== getUrlLangIndex())
   const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
   // Get the HTML element and show the message.
   const changeLangContainer = document.getElementById('changeLangContainer');
-  changeLangContainer.style.display = "block";
-  changeLangContainer.innerHTML = `<a href="${newUrl}">${langCodes[getBrowserLangIndex()].sentence}</a>`;
+  changeLangContainer.classList.add('show');
+  const newUrlLink = document.createElement('a');
+  newUrlLink.href = newUrl;
+  newUrlLink.textContent = langCodes[getBrowserLangIndex()].sentence;
+  changeLangContainer.appendChild(newUrlLink);
 } else if (getBrowserLangIndex() === -1) {
   console.warn("Sorry but we don't have our website in your browser's language.");
 }
