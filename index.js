@@ -1,16 +1,18 @@
-// This script works by checking the value of the language code found in the current url (window.location) against the language set on the browser.
-// The language code in the url of the site is expected to be located after the origin and at the begining of the path: www.example.com/LANG/rest/of/the/path
-// The default site language in this case is considered English, without any lang code in the url.
-
 /**
- * Website language codes used in the url.
- * Set the language codes used as the values of the entries.
+ * This script works by checking the value of the language code found in the current url (window.location) against the language set on the browser.
+ * The language code in the url of the site is expected to be located after the origin and at the begining of the path:
+ *   www.example.com/LANG/rest/of/the/path
  */
 
-// IMPORTATN LEAVE EMPTY string THE urlCode value OF THE DEFAULT LANG
-// put the beginning of the browser code, until the dash. should be the official
-// Add the available languages in the website.
-const langCodes2 = [
+
+/**
+ * ADD THE AVAILABLE LANGUAGES ON THE WEBSITE TO THIS ARRAY OF LANGUAGE OBJECTS.
+ * For each language object set:
+ * * 'urlCode': lang code used in the website url. Leave as an empty string for language that corresponds to the url without any code (default language).
+ * * 'browserCode': the beginning of the official browser lang code until the dash (included). https://www.metamodpro.com/browser-language-codes
+ * * 'sentence': string to be displayed to the user suggesting to change to that language.
+ */
+const langCodes = [
   {
     urlCode: 'es',
     browserCode: 'es-',
@@ -49,47 +51,56 @@ const langCodes2 = [
 ];
 
 
-// Returns the index of the code lang in langCodes2.
+
+/**
+ * Returns the index of the website language in the langCodes array.
+ */
 function getUrlLangIndex() {
   const websitePath = window.location.pathname;
-  const xx = langCodes2.findIndex(lang => {
+  const langIndex = langCodes.findIndex(lang => {
     const langRegExp = new RegExp('^\/' + lang.urlCode + '\/');
     return langRegExp.test(websitePath);
   });
-  // If -1 return the index of the empty, which is the default
-  if (xx === -1) 
-    return langCodes2.findIndex(lang => lang.urlCode === '');
+  // If no lang code is found in the url return the index of the language object with empty 'urlCode'.
+  if (langIndex === -1) 
+    return langCodes.findIndex(lang => lang.urlCode === '');
   else
-    return xx;
+    return langIndex;
 }
 
-// If no code matches it is intended that the website doesnt have the browsers language and -1 is returned.
+
+/**
+ * Returns the index of the browser language in the langCodes array.
+ * If the browser is in a language not available in the website -1 is returned.
+ */
 function getBrowserLangIndex() {
   const browserLang = navigator.language || navigator.userLanguage;
-  return langCodes2.findIndex(lang => {
+  return langCodes.findIndex(lang => {
     const langRegExp = new RegExp('^' + lang.browserCode + '{0,1}');
     return langRegExp.test(browserLang);
   });
 }
 
-// Here is checked if a redirection could be necessary.
-// If the getBrowserLang returns undefined it means that we have no website language that can match, so nothing is done.
-// If there is a supported browser language and it is different than the one on the current website then offer the website with the browser lang.
+
+// Check if a redirection could be necessary.
+// If the getBrowserLangIndex() returns -1 means that we have no website language that matches, so nothing is done.
+// If the browser lang is available on the website and it is different than the one on the url then suggest to change it.
 if (getBrowserLangIndex() !== -1 && getBrowserLangIndex() !== getUrlLangIndex()) {
-  const newUrlLangCode = langCodes2[getBrowserLangIndex()].urlCode;
-  // remove the existing url lang if any
+  const newUrlLangCode = langCodes[getBrowserLangIndex()].urlCode;
   let urlPathname;
-  if (langCodes2[getUrlLangIndex()].urlCode !== '') {
-    const pathRegExp = new RegExp('^\/' + langCodes2[getUrlLangIndex()].urlCode + '(\/.+)');
+  if (langCodes[getUrlLangIndex()].urlCode !== '') {
+    const pathRegExp = new RegExp('^\/' + langCodes[getUrlLangIndex()].urlCode + '(\/.+)');
+    // Remove the current lang code on the url.
     urlPathnameRes = window.location.pathname.match(pathRegExp);
     urlPathname = urlPathnameRes !== null ? urlPathnameRes[1] : '/';
   } else {
     urlPathname = window.location.pathname;
   }
   const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
+  // Get the HTML element and show the message.
   const changeLangContainer = document.getElementById('changeLangContainer');
-  changeLangContainer.style.display = "block"; // TODO add a class that has opacity with transition.
-  changeLangContainer.innerHTML = `<a href="${newUrl}">${langCodes2[getBrowserLangIndex()].sentence}</a>`;
+  changeLangContainer.style.display = "block";
+  changeLangContainer.innerHTML = `<a href="${newUrl}">${langCodes[getBrowserLangIndex()].sentence}</a>`;
 } else if (getBrowserLangIndex() === -1) {
   console.warn("Sorry but we don't have our website in your browser's language.");
 }
