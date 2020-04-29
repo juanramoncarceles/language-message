@@ -82,6 +82,29 @@
 
 
   /**
+   * Sets the CSS 'top' and 'right' absolute values for the provided HTML element.
+   * It doesn't set the CSS Position as 'absolute' neither the 'z-index' so make sure you set those elsewhere.
+   * @param {HTMLElement} htmlElement The HTML element to position.
+   * @param {HTMLElement[]} htmlRefElements Array of HTMLElement in order of preference to calculate the Top value base of.
+   * @param {number} defaultTop Optional default top value in case reference HTML elements doens't work.
+   * @param {number} defaultRight Optional default right value in case reference HTML elements doesn't work.
+   */
+  function setContainerAbsolutePosition(htmlElement, htmlRefElements, defaultTop = 0, defaultRight = 0) {
+    let topValue = defaultTop;
+    let rightValue = defaultRight;
+    for (let i = 0; i < htmlRefElements.length; i++) {
+      if (htmlRefElements[i] !== null && (htmlRefElements[i].getBoundingClientRect().bottom > 0 || htmlRefElements[i].getBoundingClientRect().right > 0)) {
+        topValue = htmlRefElements[i].getBoundingClientRect().bottom;
+        rightValue = window.innerWidth - htmlRefElements[i].getBoundingClientRect().right;
+        break;
+      }
+    }
+    htmlElement.style.top = topValue + 'px';
+    htmlElement.style.right = rightValue + 'px';
+  }
+
+
+  /**
    * Main function.
    * Checks if a tip for redirection to the site in another language is necessary
    * and if so it shows it.
@@ -105,6 +128,10 @@
       const langTipContainer = document.createElement('div');
       langTipContainer.classList.add('language-tip');
       langTipContainer.innerHTML = `<svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#000" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15"></line><line x1="0" y1="15" x2="15" y2="0"></line></svg><a href="${newUrl}" class="confirm-btn ast-button">${langCodes[getBrowserLangIndex()].sentence}</a><span class="dont-show-again-btn">Don\'t show again</span>`;
+      // Set the absolute position based on the position of another HTML element in the DOM.
+      langTipContainer.style.position = 'absolute';
+      langTipContainer.style.zIndex = '100';
+      setContainerAbsolutePosition(langTipContainer, [document.querySelector('.wpml-ls-current-language'), document.querySelector('.ast-mobile-menu-buttons')], 130, 10);
       document.body.appendChild(langTipContainer);
     } else if (getBrowserLangIndex() === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");

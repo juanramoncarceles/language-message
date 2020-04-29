@@ -7,3 +7,11 @@
   document.cookie = "dontAskLang=true;preferredLang=es";
 
 ☐ The cross button should close the button.
+
+☐ Text should say "Esta web está disponible en Español"
+
+☐ Put it on top, or if there is not enough space below.
+
+☐ Shape should be like a tooltip.
+
+☐ "Don't ask/show again" should be a checkbox.
