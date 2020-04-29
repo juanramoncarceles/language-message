@@ -127,6 +127,10 @@
       // Create the HTML element to show the message and append it.
       const langTipContainer = document.createElement('div');
       langTipContainer.classList.add('language-tip');
+      // Event listener to close the language tooltip.
+      langTipContainer.addEventListener('click', e => {
+        if (e.target.closest('.close-btn') !== null) langTipContainer.remove();
+      });
       langTipContainer.innerHTML = `<svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#000" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15"></line><line x1="0" y1="15" x2="15" y2="0"></line></svg><a href="${newUrl}" class="confirm-btn ast-button">${langCodes[getBrowserLangIndex()].sentence}</a><span class="dont-show-again-btn">Don\'t show again</span>`;
       // Set the absolute position based on the position of another HTML element in the DOM.
       langTipContainer.style.position = 'absolute';

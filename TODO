@@ -6,7 +6,7 @@
 
   document.cookie = "dontAskLang=true;preferredLang=es";
 
-☐ The cross button should close the button.
+✔ The cross button should close the button. @done(20-04-29 13:28)
 
 ☐ Text should say "Esta web está disponible en Español"
 
