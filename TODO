@@ -6,12 +6,16 @@
 
   document.cookie = "dontAskLang=true;preferredLang=es";
 
+☐ If no reference HTML element is found and it is positioned with default values tooltip arrow should not be visible.
+
+☐ Check how it looks from a smartphone.
+
 ✔ The cross button should close the button. @done(20-04-29 13:28)
 
-☐ Text should say "Esta web está disponible en Español"
+✔ Text should say "Esta web está disponible en Español" @done(20-04-30 13:01)
 
-☐ Put it on top, or if there is not enough space below.
+✔ Put it on top, or if there is not enough space below. @done(20-04-30 13:01)
 
-☐ Shape should be like a tooltip.
+✔ Shape should be like a tooltip. @done(20-04-30 13:01)
 
-☐ "Don't ask/show again" should be a checkbox.
+✔ "Don't ask/show again" should be a checkbox. @done(20-04-30 13:01)

@@ -16,37 +16,51 @@
     {
       urlCode: 'es',
       browserCode: 'es',
-      sentence: 'Ver en Español'
+      sentence: 'Esta página está disponible en Español',
+      button: 'Ver en Español',
+      remember: 'No volver a mostrar'
     },
     {
       urlCode: 'fr',
       browserCode: 'fr',
-      sentence: 'Voir en Français'
+      sentence: '',
+      button: 'Voir en Français',
+      remember: ''
     },
     {
       urlCode: 'it',
       browserCode: 'it',
-      sentence: 'Vedere in Italiano'
+      sentence: 'Questa web è disponibile in Italiano',
+      button: 'Vedere in Italiano',
+      remember: 'Non mostrare di nuovo'
     },
     {
       urlCode: 'de',
       browserCode: 'de',
-      sentence: 'Ansicht auf Deutsch'
+      sentence: '',
+      button: 'Ansicht auf Deutsch',
+      remember: ''
     },
     {
       urlCode: 'zh-hans',
       browserCode: 'zh',
-      sentence: '用中文查看'
+      sentence: '',
+      button: '用中文查看',
+      remember: ''
     },
     {
       urlCode: 'ko',
       browserCode: 'ko',
-      sentence: '한국어로보기'
+      sentence: '',
+      button: '한국어로보기',
+      remember: ''
     },
     {
       urlCode: '',
       browserCode: 'en',
-      sentence: 'View in English'
+      sentence: 'This page is available in English',
+      button: 'View in English',
+      remember: 'Don\'t show again'
     }
   ];
 
@@ -61,7 +75,7 @@
       return langRegExp.test(websitePath);
     });
     // If no lang code is found in the url return the index of the language object with empty 'urlCode'.
-    if (langIndex === -1) 
+    if (langIndex === -1)
       return langCodes.findIndex(lang => lang.urlCode === '');
     else
       return langIndex;
@@ -81,6 +95,10 @@
   }
 
 
+  // Tip arrow size in pixels.
+  const globalTipArrowSize = 8;
+
+
   /**
    * Sets the CSS 'top' and 'right' absolute values for the provided HTML element.
    * It doesn't set the CSS Position as 'absolute' neither the 'z-index' so make sure you set those elsewhere.
@@ -94,8 +112,11 @@
     let rightValue = defaultRight;
     for (let i = 0; i < htmlRefElements.length; i++) {
       if (htmlRefElements[i] !== null && (htmlRefElements[i].getBoundingClientRect().bottom > 0 || htmlRefElements[i].getBoundingClientRect().right > 0)) {
-        topValue = htmlRefElements[i].getBoundingClientRect().bottom;
-        rightValue = window.innerWidth - htmlRefElements[i].getBoundingClientRect().right;
+        // Container position.
+        topValue = htmlRefElements[i].getBoundingClientRect().bottom + globalTipArrowSize;
+        rightValue = window.innerWidth - (htmlRefElements[i].getBoundingClientRect().right);
+        // Container arrow position.
+        htmlElement.style.setProperty('--right-distance', htmlRefElements[i].getBoundingClientRect().width / 2 + 'px');
         break;
       }
     }
@@ -105,15 +126,43 @@
 
 
   /**
+   * Creates an HTML element to show the message with the link to the suggested page.
+   * @param {Object} langCodeObj The language object for the suggested language with the contents to populate the container.
+   * @param {string} url The url of the equivalent page in the suggested language. 
+   * @param {number} tipArrowSize Size in pixels of the tooltip arrow.
+   */
+  function createLanguageTooltip(langCodeObj, url, tipArrowSize) {
+    const container = document.createElement('div');
+    container.classList.add('language-tip');
+    // Event listener to close the container.
+    container.addEventListener('click', e => {
+      if (e.target.closest('.close-btn') !== null) container.remove();
+    });
+    container.style.setProperty('--tip-arrow-size', tipArrowSize + 'px');
+    container.innerHTML = `
+      <svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#000" stroke-width="2">
+        <line x1="0" y1="0" x2="15" y2="15" />
+        <line x1="0" y1="15" x2="15" y2="0" />
+      </svg>
+      <span>${langCodeObj.sentence}</span>
+      <a href="${url}" class="ast-button" style="margin:10px 0;">${langCodeObj.button}</a>
+      <div class="dont-show-again"><input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span></div>`;
+    return container;
+  }
+
+
+  /**
    * Main function.
-   * Checks if a tip for redirection to the site in another language is necessary
+   * Checks if a tooltip for redirection to the page in another language is necessary
    * and if so it shows it.
    */
-  function manageLanguageTip() {
+  function main() {
     // If the getBrowserLangIndex() returns -1 means that we have no website language that matches, so nothing is done.
     // If the browser lang is available on the website and it is different than the one on the url then suggest to change it.
     if (getBrowserLangIndex() !== -1 && getBrowserLangIndex() !== getUrlLangIndex()) {
-      const newUrlLangCode = langCodes[getBrowserLangIndex()].urlCode;
+      // Language object with the browser language.
+      const browserLangCodeObj = langCodes[getBrowserLangIndex()];
+      const newUrlLangCode = browserLangCodeObj.urlCode;
       let urlPathname;
       if (langCodes[getUrlLangIndex()].urlCode !== '') {
         const pathRegExp = new RegExp('^\/' + langCodes[getUrlLangIndex()].urlCode + '(\/.+)');
@@ -125,13 +174,7 @@
       }
       const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
       // Create the HTML element to show the message and append it.
-      const langTipContainer = document.createElement('div');
-      langTipContainer.classList.add('language-tip');
-      // Event listener to close the language tooltip.
-      langTipContainer.addEventListener('click', e => {
-        if (e.target.closest('.close-btn') !== null) langTipContainer.remove();
-      });
-      langTipContainer.innerHTML = `<svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#000" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15"></line><line x1="0" y1="15" x2="15" y2="0"></line></svg><a href="${newUrl}" class="confirm-btn ast-button">${langCodes[getBrowserLangIndex()].sentence}</a><span class="dont-show-again-btn">Don\'t show again</span>`;
+      const langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
       // Set the absolute position based on the position of another HTML element in the DOM.
       langTipContainer.style.position = 'absolute';
       langTipContainer.style.zIndex = '100';
@@ -142,5 +185,5 @@
     }
   }
 
-  window.addEventListener('load', manageLanguageTip);
+  window.addEventListener('load', main);
 })();
