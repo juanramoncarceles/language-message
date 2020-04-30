@@ -176,8 +176,6 @@
       // Create the HTML element to show the message and append it.
       const langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
       // Set the absolute position based on the position of another HTML element in the DOM.
-      langTipContainer.style.position = 'absolute';
-      langTipContainer.style.zIndex = '100';
       setContainerAbsolutePosition(langTipContainer, [document.querySelector('.wpml-ls-current-language'), document.querySelector('.ast-mobile-menu-buttons')], 130, 10);
       document.body.appendChild(langTipContainer);
     } else if (getBrowserLangIndex() === -1) {
