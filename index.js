@@ -23,9 +23,9 @@
     {
       urlCode: 'fr',
       browserCode: 'fr',
-      sentence: '',
+      sentence: 'Cette page est disponible en français',
       button: 'Voir en Français',
-      remember: ''
+      remember: 'Ne montre plus'
     },
     {
       urlCode: 'it',
@@ -37,23 +37,23 @@
     {
       urlCode: 'de',
       browserCode: 'de',
-      sentence: '',
+      sentence: 'Diese Seite ist auf Deutsch verfügbar',
       button: 'Ansicht auf Deutsch',
-      remember: ''
+      remember: 'Nicht mehr zeigen'
     },
     {
       urlCode: 'zh-hans',
       browserCode: 'zh',
-      sentence: '',
+      sentence: '此页面有中文版本',
       button: '用中文查看',
-      remember: ''
+      remember: '不再显示'
     },
     {
       urlCode: 'ko',
       browserCode: 'ko',
-      sentence: '',
+      sentence: '이 페이지는 한국어로 제공됩니다',
       button: '한국어로보기',
-      remember: ''
+      remember: '다시 표시하지 않습니다'
     },
     {
       urlCode: '',
@@ -177,7 +177,11 @@
       const langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
       // Set the absolute position based on the position of another HTML element in the DOM.
       setContainerAbsolutePosition(langTipContainer, [document.querySelector('.wpml-ls-current-language'), document.querySelector('.ast-mobile-menu-buttons')], 130, 10);
+      langTipContainer.classList.add('hidden');
       document.body.appendChild(langTipContainer);
+      window.setTimeout(() => {
+        langTipContainer.classList.remove('hidden');
+      }, 2500);
     } else if (getBrowserLangIndex() === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");
     }
