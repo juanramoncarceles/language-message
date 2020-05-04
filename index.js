@@ -66,7 +66,22 @@
 
 
   /**
-   * Returns the index of the website language in the langCodes array.
+   * Theme specific data to place and style the tooltip.
+   * @property {string[]} referenceElements CSS classes or ids to place the tooltip below the element where they are.
+   * Should be in order of preference. If they are classes, the first one that is find is the one that will be used.
+   * @example ['.wpml-ls-current-language', '.ast-mobile-menu-buttons']
+   * @property {string} buttonStyle Optional CSS class to style the main anchor element. An empty string if none.
+   * @example 'ast-button'
+   */
+  const themeData = {
+    referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'],
+    buttonStyle: 'ast-button'
+  }
+
+
+  /**
+   * Gets the language of the url.
+   * @returns {number} The index of the website language in the langCodes array.
    */
   function getUrlLangIndex() {
     const websitePath = window.location.pathname;
@@ -140,12 +155,12 @@
     });
     container.style.setProperty('--tip-arrow-size', tipArrowSize + 'px');
     container.innerHTML = `
-      <svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#000" stroke-width="2">
+      <svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2">
         <line x1="0" y1="0" x2="15" y2="15" />
         <line x1="0" y1="15" x2="15" y2="0" />
       </svg>
       <span>${langCodeObj.sentence}</span>
-      <a href="${url}" class="ast-button" style="margin:10px 0;">${langCodeObj.button}</a>
+      <a href="${url}" ${themeData.buttonStyle ? `class="${themeData.buttonStyle}"` : ''} style="margin:10px 0;">${langCodeObj.button}</a>
       <div class="dont-show-again"><input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span></div>`;
     return container;
   }
