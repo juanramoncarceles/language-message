@@ -8,9 +8,11 @@
   /**
    * ADD THE AVAILABLE LANGUAGES ON THE WEBSITE TO THIS ARRAY OF LANGUAGE OBJECTS.
    * For each language object set:
-   * * 'urlCode': lang code used in the website url. Leave as an empty string for language that corresponds to the url without any code (default language).
-   * * 'browserCode': the two first characters of the official browser lang code. https://www.metamodpro.com/browser-language-codes
-   * * 'sentence': string to be displayed to the user suggesting to change to that language.
+   * @property {string} urlCode Lang code used in the website url (without the slashes). Leave as empty string for the language that corresponds to the url without any code.
+   * @property {string} browserCode The two first characters of the official browser lang code. https://www.metamodpro.com/browser-language-codes
+   * @property {string} sentence First string on the tooltip. For example: 'This page is available in English'
+   * @property {string} button Text content for the main button. For example: 'View in English'
+   * @property {string} remember Label for the checkboc to don't show again the tooltip. For example: 'Don't show again'
    */
   const langCodes = [
     {
@@ -98,8 +100,9 @@
 
 
   /**
-   * Returns the index of the browser language in the langCodes array.
-   * If the browser is in a language not available in the website -1 is returned.
+   * Gets the language of the browser only if it is a language available for the website (available in the langCodes object).
+   * If the browser is in a language not available -1 is returned.
+   * @returns {number} The index of the browser language in the langCodes array.
    */
   function getBrowserLangIndex() {
     const browserLang = navigator.language || navigator.userLanguage;
@@ -118,15 +121,19 @@
    * Sets the CSS 'top' and 'right' absolute values for the provided HTML element.
    * It doesn't set the CSS Position as 'absolute' neither the 'z-index' so make sure you set those elsewhere.
    * @param {HTMLElement} htmlElement The HTML element to position.
-   * @param {HTMLElement[]} htmlRefElements Array of HTMLElement in order of preference to calculate the Top value base of.
+   * @param {string[]} refElementsClassOrId CSS class or id selectors in order of preference to calculate the Top and Right position values.
    * @param {number} defaultTop Optional default top value in case reference HTML elements doens't work.
    * @param {number} defaultRight Optional default right value in case reference HTML elements doesn't work.
    */
-  function setContainerAbsolutePosition(htmlElement, htmlRefElements, defaultTop = 0, defaultRight = 0) {
+  function setContainerAbsolutePosition(htmlElement, refElementsClassOrId, defaultTop = 0, defaultRight = 0) {
     let topValue = defaultTop;
     let rightValue = defaultRight;
+    const htmlRefElements = [];
+    refElementsClassOrId.forEach(selector => {
+      if (document.querySelector(selector) !== null) htmlRefElements.push(document.querySelector(selector));
+    });
     for (let i = 0; i < htmlRefElements.length; i++) {
-      if (htmlRefElements[i] !== null && (htmlRefElements[i].getBoundingClientRect().bottom > 0 || htmlRefElements[i].getBoundingClientRect().right > 0)) {
+      if (htmlRefElements[i].getBoundingClientRect().bottom > 0 || htmlRefElements[i].getBoundingClientRect().right > 0) {
         // Container position.
         topValue = htmlRefElements[i].getBoundingClientRect().bottom + globalTipArrowSize;
         rightValue = window.innerWidth - (htmlRefElements[i].getBoundingClientRect().right);
@@ -141,10 +148,11 @@
 
 
   /**
-   * Creates an HTML element to show the message with the link to the suggested page.
+   * Creates the HTML structure of the tooltip with all the data.
    * @param {Object} langCodeObj The language object for the suggested language with the contents to populate the container.
    * @param {string} url The url of the equivalent page in the suggested language. 
    * @param {number} tipArrowSize Size in pixels of the tooltip arrow.
+   * @returns {HTMLDivElement} The HTML tooltip element.
    */
   function createLanguageTooltip(langCodeObj, url, tipArrowSize) {
     const container = document.createElement('div');
@@ -190,8 +198,8 @@
       const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
       // Create the HTML element to show the message and append it.
       const langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
-      // Set the absolute position based on the position of another HTML element in the DOM.
-      setContainerAbsolutePosition(langTipContainer, [document.querySelector('.wpml-ls-current-language'), document.querySelector('.ast-mobile-menu-buttons')], 130, 10);
+      // Sets the absolute position based on the position of another HTML element in the DOM.
+      setContainerAbsolutePosition(langTipContainer, themeData.referenceElements, 130, 10);
       langTipContainer.classList.add('hidden');
       document.body.appendChild(langTipContainer);
       window.setTimeout(() => {
