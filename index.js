@@ -14,7 +14,7 @@
    * @property {string} button Text content for the main button. For example: 'View in English'
    * @property {string} remember Label for the checkboc to don't show again the tooltip. For example: 'Don't show again'
    */
-  const langCodes = [
+  const languagesData = [
     {
       urlCode: 'es',
       browserCode: 'es',
@@ -83,30 +83,30 @@
 
   /**
    * Gets the language of the url.
-   * @returns {number} The index of the website language in the langCodes array.
+   * @returns {number} The index of the website language in the languagesData array.
    */
   function getUrlLangIndex() {
     const websitePath = window.location.pathname;
-    const langIndex = langCodes.findIndex(lang => {
+    const langIndex = languagesData.findIndex(lang => {
       const langRegExp = new RegExp('^\/' + lang.urlCode + '\/');
       return langRegExp.test(websitePath);
     });
     // If no lang code is found in the url return the index of the language object with empty 'urlCode'.
     if (langIndex === -1)
-      return langCodes.findIndex(lang => lang.urlCode === '');
+      return languagesData.findIndex(lang => lang.urlCode === '');
     else
       return langIndex;
   }
 
 
   /**
-   * Gets the language of the browser only if it is a language available for the website (available in the langCodes object).
+   * Gets the language of the browser only if it is a language available for the website (available in the languagesData object).
    * If the browser is in a language not available -1 is returned.
-   * @returns {number} The index of the browser language in the langCodes array.
+   * @returns {number} The index of the browser language in the languagesData array.
    */
   function getBrowserLangIndex() {
     const browserLang = navigator.language || navigator.userLanguage;
-    return langCodes.findIndex(lang => {
+    return languagesData.findIndex(lang => {
       const langRegExp = new RegExp('^' + lang.browserCode);
       return langRegExp.test(browserLang);
     });
@@ -184,11 +184,11 @@
     // If the browser lang is available on the website and it is different than the one on the url then suggest to change it.
     if (getBrowserLangIndex() !== -1 && getBrowserLangIndex() !== getUrlLangIndex()) {
       // Language object with the browser language.
-      const browserLangCodeObj = langCodes[getBrowserLangIndex()];
+      const browserLangCodeObj = languagesData[getBrowserLangIndex()];
       const newUrlLangCode = browserLangCodeObj.urlCode;
       let urlPathname;
-      if (langCodes[getUrlLangIndex()].urlCode !== '') {
-        const pathRegExp = new RegExp('^\/' + langCodes[getUrlLangIndex()].urlCode + '(\/.+)');
+      if (languagesData[getUrlLangIndex()].urlCode !== '') {
+        const pathRegExp = new RegExp('^\/' + languagesData[getUrlLangIndex()].urlCode + '(\/.+)');
         // Remove the current lang code on the url.
         urlPathnameRes = window.location.pathname.match(pathRegExp);
         urlPathname = urlPathnameRes !== null ? urlPathnameRes[1] : '/';

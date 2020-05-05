@@ -1,4 +1,4 @@
-☐ Add cookies
+☐ Add cookies @high 
   If the user clicks on the link, then the language on the link is stored as 'preferredLang'
   Next time if the website url is not in that language it will be redirected automatically.
 
@@ -14,11 +14,11 @@
 
 ☐ Two seconds delay before it appears. It works locally but not on the deployed.
 
-☐ Rename langCodes object to langData.
-
 ☐ How would it work if I fetch the info of the availble languages each time? The array of lang objects would be different.
 
 ☐ Check how it looks from a smartphone.
+
+✔ Rename langCodes object to languagesData. @done(20-05-05 11:50)
 
 ✔ Set a lower z-index so the language dropdown appears on top of it. @done(20-04-30 14:01)
 
