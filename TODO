@@ -8,8 +8,6 @@
 
 ☐ If no reference HTML element is found and it is positioned with default values tooltip arrow should not be visible.
 
-☐ When resizing the window the tooltip remains on the same place. setContainerAbsolutePoisition() should be recalutlated on resize.
-
 ☐ setContainerAbsolutePosition() can use one loop instead of two @low
   for ()
     if (document.querySelector(selector[i]) && htmlRefElements.push(document.querySelector(selector[i]) && (bottom > 0 || right > 0)) {  }
@@ -20,18 +18,12 @@
 
 ☐ Check how it looks from a smartphone.
 
+✔ When resizing the window the tooltip remains on the same place. setContainerAbsolutePoisition() should be recalutlated on resize. @done(20-05-11 17:22)
 ✔ When scrolling the page the tooltip remains on the same place. setContainerAbsolutePosition() should be recalculated on scroll @done(20-05-11 16:37)
-
 ✔ Rename langCodes object to languagesData. @done(20-05-05 11:50)
-
 ✔ Set a lower z-index so the language dropdown appears on top of it. @done(20-04-30 14:01)
-
 ✔ The cross button should close the button. @done(20-04-29 13:28)
-
 ✔ Text should say "Esta web está disponible en Español" @done(20-04-30 13:01)
-
 ✔ Put it on top, or if there is not enough space below. @done(20-04-30 13:01)
-
 ✔ Shape should be like a tooltip. @done(20-04-30 13:01)
-
 ✔ "Don't ask/show again" should be a checkbox. @done(20-04-30 13:01)

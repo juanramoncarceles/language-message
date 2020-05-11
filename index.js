@@ -128,16 +128,12 @@
   /**
    * Sets the CSS 'top' and 'right' absolute values for the provided HTML element.
    * It doesn't set the CSS Position as 'absolute' neither the 'z-index' so make sure you set those elsewhere.
-   * @param {HTMLElement} htmlElement The HTML element to position.
-   * @param {string[]} refElementsClassOrId CSS class or id selectors in order of preference to calculate the Top and Right position values.
-   * @param {number} defaultTop Optional default top value in case reference HTML elements doens't work.
-   * @param {number} defaultRight Optional default right value in case reference HTML elements doesn't work.
    */
-  function setContainerAbsolutePosition(htmlElement, refElementsClassOrId, defaultTop = 0, defaultRight = 0) {
-    let topValue = defaultTop;
-    let rightValue = defaultRight;
+  function setContainerAbsolutePosition() {
+    let topValue = 130;
+    let rightValue = 10;
     const htmlRefElements = [];
-    refElementsClassOrId.forEach(selector => {
+    themeData.referenceElements.forEach(selector => {
       if (document.querySelector(selector) !== null) htmlRefElements.push(document.querySelector(selector));
     });
     for (let i = 0; i < htmlRefElements.length; i++) {
@@ -146,13 +142,12 @@
         topValue = htmlRefElements[i].getBoundingClientRect().bottom + globalTipArrowSize;
         rightValue = window.innerWidth - (htmlRefElements[i].getBoundingClientRect().right);
         // Container arrow position.
-        htmlElement.style.setProperty('--right-distance', htmlRefElements[i].getBoundingClientRect().width / 2 + 'px');
+        langTipContainer.style.setProperty('--right-distance', htmlRefElements[i].getBoundingClientRect().width / 2 + 'px');
         break;
       }
     }
-    htmlElement.dataset.top = topValue;
-    htmlElement.style.top = topValue + 'px';
-    htmlElement.style.right = rightValue + 'px';
+    langTipContainer.style.top = topValue + window.scrollY + 'px';
+    langTipContainer.style.right = rightValue + 'px';
   }
 
 
@@ -184,22 +179,15 @@
 
 
   /**
-   * Removes the tooltip HTML element from the DOM and all its related events.
+   * Removes the tooltip HTML element from the DOM and all its related events listeners.
    */
   function removeTooltip() {
-    window.removeEventListener('scroll', calculateTop);
+    window.removeEventListener('scroll', setContainerAbsolutePosition);
+    window.removeEventListener('resize', setContainerAbsolutePosition);
     langTipContainer.remove();
   }
   
 
-  /**
-   * Calculates and assigns the CSS 'top' value to the tooltip HTML element with the possible scroll value.
-   */
-  function calculateTop() {
-    langTipContainer.style.top = Number(langTipContainer.dataset.top) + window.scrollY + 'px';
-  }
-  
-  
   /**
    * Main function.
    * Checks if a tooltip for redirection to the page in another language is necessary
@@ -226,7 +214,8 @@
       langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
       // Sets the absolute position based on the position of another HTML element in the DOM.
       setContainerAbsolutePosition(langTipContainer, themeData.referenceElements, 130, 10);      
-      window.addEventListener('scroll', calculateTop);
+      window.addEventListener('scroll', setContainerAbsolutePosition);
+      window.addEventListener('resize', setContainerAbsolutePosition);
       langTipContainer.classList.add('hidden');
       document.body.appendChild(langTipContainer);
       window.setTimeout(() => {
