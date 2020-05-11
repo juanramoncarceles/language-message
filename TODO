@@ -8,8 +8,6 @@
 
 ☐ If no reference HTML element is found and it is positioned with default values tooltip arrow should not be visible.
 
-☐ When scrolling the page the tooltip remains on the same place. setContainerAbsolutePosition() should be recalculated on scroll
-
 ☐ When resizing the window the tooltip remains on the same place. setContainerAbsolutePoisition() should be recalutlated on resize.
 
 ☐ setContainerAbsolutePosition() can use one loop instead of two @low
@@ -21,6 +19,8 @@
 ☐ How would it work if I fetch the info of the availble languages each time? The array of lang objects would be different.
 
 ☐ Check how it looks from a smartphone.
+
+✔ When scrolling the page the tooltip remains on the same place. setContainerAbsolutePosition() should be recalculated on scroll @done(20-05-11 16:37)
 
 ✔ Rename langCodes object to languagesData. @done(20-05-05 11:50)
 
