@@ -8,7 +8,11 @@
 
 ☐ If no reference HTML element is found and it is positioned with default values tooltip arrow should not be visible.
 
-☐ setContainerAbsolutePosition() can use one loop instead of two
+☐ When scrolling the page the tooltip remains on the same place. setContainerAbsolutePosition() should be recalculated on scroll
+
+☐ When resizing the window the tooltip remains on the same place. setContainerAbsolutePoisition() should be recalutlated on resize.
+
+☐ setContainerAbsolutePosition() can use one loop instead of two @low
   for ()
     if (document.querySelector(selector[i]) && htmlRefElements.push(document.querySelector(selector[i]) && (bottom > 0 || right > 0)) {  }
 
