@@ -82,6 +82,18 @@
 
 
   /**
+   * Tip arrow size in pixels.
+   */
+  const globalTipArrowSize = 8;
+
+
+  /**
+   * Reference to the tooltip HTML element.
+   */
+  let langTipContainer;
+
+
+  /**
    * Gets the language of the url.
    * @returns {number} The index of the website language in the languagesData array.
    */
@@ -113,10 +125,6 @@
   }
 
 
-  // Tip arrow size in pixels.
-  const globalTipArrowSize = 8;
-
-
   /**
    * Sets the CSS 'top' and 'right' absolute values for the provided HTML element.
    * It doesn't set the CSS Position as 'absolute' neither the 'z-index' so make sure you set those elsewhere.
@@ -142,6 +150,7 @@
         break;
       }
     }
+    htmlElement.dataset.top = topValue;
     htmlElement.style.top = topValue + 'px';
     htmlElement.style.right = rightValue + 'px';
   }
@@ -159,7 +168,7 @@
     container.classList.add('language-tip');
     // Event listener to close the container.
     container.addEventListener('click', e => {
-      if (e.target.closest('.close-btn') !== null) container.remove();
+      if (e.target.closest('.close-btn') !== null) removeTooltip();
     });
     container.style.setProperty('--tip-arrow-size', tipArrowSize + 'px');
     container.innerHTML = `
@@ -174,6 +183,23 @@
   }
 
 
+  /**
+   * Removes the tooltip HTML element from the DOM and all its related events.
+   */
+  function removeTooltip() {
+    window.removeEventListener('scroll', calculateTop);
+    langTipContainer.remove();
+  }
+  
+
+  /**
+   * Calculates and assigns the CSS 'top' value to the tooltip HTML element with the possible scroll value.
+   */
+  function calculateTop() {
+    langTipContainer.style.top = Number(langTipContainer.dataset.top) + window.scrollY + 'px';
+  }
+  
+  
   /**
    * Main function.
    * Checks if a tooltip for redirection to the page in another language is necessary
@@ -196,10 +222,11 @@
         urlPathname = window.location.pathname;
       }
       const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
-      // Create the HTML element to show the message and append it.
-      const langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
+      // Assigns a reference to the tooltip HTML element.
+      langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
       // Sets the absolute position based on the position of another HTML element in the DOM.
-      setContainerAbsolutePosition(langTipContainer, themeData.referenceElements, 130, 10);
+      setContainerAbsolutePosition(langTipContainer, themeData.referenceElements, 130, 10);      
+      window.addEventListener('scroll', calculateTop);
       langTipContainer.classList.add('hidden');
       document.body.appendChild(langTipContainer);
       window.setTimeout(() => {

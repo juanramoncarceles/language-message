@@ -6,6 +6,7 @@
 
 body {
   margin: 0;
+  height: 200vh;
 }
 
 header {
@@ -13,6 +14,8 @@ header {
   justify-content: space-between;
   height: 72px;
   padding: 0.5rem;
+  position: sticky;
+  top: 0;
   margin: auto;
   max-width: 900px;
   background-color: lightgrey;
