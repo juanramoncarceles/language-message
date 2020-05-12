@@ -132,17 +132,16 @@
   function setContainerAbsolutePosition() {
     let topValue = 130;
     let rightValue = 10;
-    const htmlRefElements = [];
-    themeData.referenceElements.forEach(selector => {
-      if (document.querySelector(selector) !== null) htmlRefElements.push(document.querySelector(selector));
-    });
-    for (let i = 0; i < htmlRefElements.length; i++) {
-      if (htmlRefElements[i].getBoundingClientRect().bottom > 0 || htmlRefElements[i].getBoundingClientRect().right > 0) {
+    let htmlRefElement;
+    for (let i = 0; i < themeData.referenceElements.length; i++) {
+      const selector = themeData.referenceElements[i];
+      if (document.querySelector(selector) && (htmlRefElement = document.querySelector(selector)) &&
+         (htmlRefElement.getBoundingClientRect().bottom > 0 || htmlRefElement.getBoundingClientRect().right > 0)) {
         // Container position.
-        topValue = htmlRefElements[i].getBoundingClientRect().bottom + globalTipArrowSize;
-        rightValue = window.innerWidth - (htmlRefElements[i].getBoundingClientRect().right);
+        topValue = htmlRefElement.getBoundingClientRect().bottom + globalTipArrowSize;
+        rightValue = window.innerWidth - (htmlRefElement.getBoundingClientRect().right);
         // Container arrow position.
-        langTipContainer.style.setProperty('--right-distance', htmlRefElements[i].getBoundingClientRect().width / 2 + 'px');
+        langTipContainer.style.setProperty('--right-distance', htmlRefElement.getBoundingClientRect().width / 2 + 'px');
         break;
       }
     }
