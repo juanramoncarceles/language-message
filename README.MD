@@ -1,3 +1,7 @@
+# DESCRIPTION
+
+Script to show a tooltip indicating if the website is available in the language of the browser.
+
 # INSTRUCTIONS
 
 Serve the folder files with a server.
