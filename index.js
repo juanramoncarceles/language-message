@@ -132,17 +132,16 @@
   function setContainerAbsolutePosition() {
     let topValue = 130;
     let rightValue = 10;
-    let htmlRefElement;
-    let boundingRect;
+    let refElementBoundingRect;
     for (let i = 0; i < themeData.referenceElements.length; i++) {
-      if (document.querySelector(themeData.referenceElements[i]) && (htmlRefElement = document.querySelector(themeData.referenceElements[i])) &&
-      (boundingRect = htmlRefElement.getBoundingClientRect()) &&   
-      (boundingRect.bottom > 0 || boundingRect.right > 0)) {
+      if (document.querySelector(themeData.referenceElements[i]) &&
+      (refElementBoundingRect = document.querySelector(themeData.referenceElements[i]).getBoundingClientRect()) &&
+      (refElementBoundingRect.bottom > 0 || refElementBoundingRect.right > 0)) {
         // Container position.
-        topValue = boundingRect.bottom + globalTipArrowSize;
-        rightValue = window.innerWidth - (boundingRect.right);
+        topValue = refElementBoundingRect.bottom + globalTipArrowSize;
+        rightValue = window.innerWidth - (refElementBoundingRect.right);
         // Container arrow position.
-        langTipContainer.style.setProperty('--right-distance', boundingRect.width / 2 + 'px');
+        langTipContainer.style.setProperty('--right-distance', refElementBoundingRect.width / 2 + 'px');
         break;
       }
     }
