@@ -133,15 +133,16 @@
     let topValue = 130;
     let rightValue = 10;
     let htmlRefElement;
+    let boundingRect;
     for (let i = 0; i < themeData.referenceElements.length; i++) {
-      const selector = themeData.referenceElements[i];
-      if (document.querySelector(selector) && (htmlRefElement = document.querySelector(selector)) &&
-         (htmlRefElement.getBoundingClientRect().bottom > 0 || htmlRefElement.getBoundingClientRect().right > 0)) {
+      if (document.querySelector(themeData.referenceElements[i]) && (htmlRefElement = document.querySelector(themeData.referenceElements[i])) &&
+      (boundingRect = htmlRefElement.getBoundingClientRect()) &&   
+      (boundingRect.bottom > 0 || boundingRect.right > 0)) {
         // Container position.
-        topValue = htmlRefElement.getBoundingClientRect().bottom + globalTipArrowSize;
-        rightValue = window.innerWidth - (htmlRefElement.getBoundingClientRect().right);
+        topValue = boundingRect.bottom + globalTipArrowSize;
+        rightValue = window.innerWidth - (boundingRect.right);
         // Container arrow position.
-        langTipContainer.style.setProperty('--right-distance', htmlRefElement.getBoundingClientRect().width / 2 + 'px');
+        langTipContainer.style.setProperty('--right-distance', boundingRect.width / 2 + 'px');
         break;
       }
     }
