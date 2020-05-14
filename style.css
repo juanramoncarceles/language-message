@@ -12,17 +12,22 @@ body {
 header {
   display: flex;
   justify-content: space-between;
-  height: 72px;
-  padding: 0.5rem;
+  padding: 1.5rem;
   position: sticky;
   top: 0;
   margin: auto;
   max-width: 900px;
+  transition: padding 1s;
   background-color: lightgrey;
 }
 
 header > span:last-child {
+  padding: 0.5rem;
   background-color: gray;
+}
+
+header.fixed {
+  padding: 0.5rem;
 }
 
 .test-item {
