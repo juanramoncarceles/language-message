@@ -12,22 +12,23 @@ body {
 header {
   display: flex;
   justify-content: space-between;
-  padding: 1.5rem;
+  padding: 0.5rem;
   position: sticky;
   top: 0;
   margin: auto;
-  max-width: 900px;
-  transition: padding 1s;
+  max-width: 900px;  
   background-color: lightgrey;
 }
 
 header > span:last-child {
   padding: 0.5rem;
+  transition: line-height 1s;
+  line-height: 3.5rem;
   background-color: gray;
 }
 
-header.fixed {
-  padding: 0.5rem;
+header.fixed > span:last-child {
+  line-height: 1.5rem;
 }
 
 .test-item {
@@ -36,8 +37,15 @@ header.fixed {
   background-color: #c0bfa0;
   position: absolute;
   top: 300px;
-  left: 450px;
+  left: 50%;
 }
+
+@media (max-width: 550px) {
+  header > span:last-child {
+    display: none;
+  }
+}
+
 
 
 
@@ -81,8 +89,8 @@ header.fixed {
   position: absolute;
   bottom: 100%;
   right: var(--right-distance, 50%);
-  margin-right: calc(var(--tip-arrow-size, 8px) * -1);
-  border-width: var(--tip-arrow-size, 8px);
+  margin-right: calc(var(--tip-arrow-size, 0) * -1);
+  border-width: var(--tip-arrow-size, 0);
   border-style: solid;
   border-color: transparent transparent var(--bg-color) transparent;
 }

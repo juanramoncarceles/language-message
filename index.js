@@ -82,15 +82,33 @@
 
 
   /**
-   * Tip arrow size in pixels.
+   * Tooltip arrow size in pixels.
    */
   const globalTipArrowSize = 8;
+  /**
+   * Default top position in pixels in case no reference HTML element is found.
+   */
+  const tooltipDefaultTop = 10;
+  /**
+   * Default right position in pixels in case no reference HTML element is found.
+   */
+  const tooltipDefaultRight = 10;
 
+
+  /************************************************** SCRIPT **************************************************/
 
   /**
    * Reference to the tooltip HTML element.
    */
   let langTipContainer;
+  /**
+   * Index of the current string in the referenceElements array.
+   */
+  let referenceElementIndex;
+  /**
+   * Reference to the HTML element used to position the tooltip.
+   */
+  let referenceElement;
 
 
   /**
@@ -128,43 +146,89 @@
   /**
    * Sets the CSS 'top' and 'right' absolute values for the provided HTML element.
    * It doesn't set the CSS Position as 'absolute' neither the 'z-index' so make sure you set those elsewhere.
+   * @param {HTMLElement | null}
    */
-  function setContainerAbsolutePosition() {
-    let topValue = 130;
-    let rightValue = 10;
-    let refElementBoundingRect;
+  function setContainerAbsolutePosition(el) { // puede ser que llegue como undefined
+    if (el !== null) {
+      const refElementBoundingRect = el.getBoundingClientRect();      
+      // Container arrow position.
+      langTipContainer.style.setProperty('--right-distance', refElementBoundingRect.width / 2 + 'px');
+      // Container position.
+      langTipContainer.style.top = refElementBoundingRect.bottom + globalTipArrowSize + window.scrollY + 'px';
+      langTipContainer.style.right = window.innerWidth - (refElementBoundingRect.right) + 'px';
+    } else {
+      langTipContainer.style.top = tooltipDefaultTop + 'px';
+      langTipContainer.style.right = tooltipDefaultRight + 'px';
+    }
+  }
+  
+
+  /**
+   * The ResizeObserver for the current target HTML element.
+   */
+  const observer = new ResizeObserver(updatePosition);
+  
+
+  // updates the current reference element which is necessary for the resize oberver, is the first one in the list that "is visilbe"
+  function updatePosition() {
+    let refEl;
+    let refElIndex;
     for (let i = 0; i < themeData.referenceElements.length; i++) {
-      if (document.querySelector(themeData.referenceElements[i]) &&
-      (refElementBoundingRect = document.querySelector(themeData.referenceElements[i]).getBoundingClientRect()) &&
-      (refElementBoundingRect.bottom > 0 || refElementBoundingRect.right > 0)) {
-        // Container position.
-        topValue = refElementBoundingRect.bottom + globalTipArrowSize;
-        rightValue = window.innerWidth - (refElementBoundingRect.right);
-        // Container arrow position.
-        langTipContainer.style.setProperty('--right-distance', refElementBoundingRect.width / 2 + 'px');
+      refEl = document.querySelector(themeData.referenceElements[i]);
+      if (refEl && elementTakesUpSpace(refEl)) {
+        refElIndex = i;
         break;
       }
     }
-    langTipContainer.style.top = topValue + window.scrollY + 'px';
-    langTipContainer.style.right = rightValue + 'px';
+    // If is the same as before nothing, otherwise update the observer
+    if (referenceElementIndex !== refElIndex) {
+      if (referenceElementIndex !== undefined) {
+        // Remove the current observed element.
+        observer.unobserve(referenceElement); // If I stop observing then if it reappears it will no be called.
+      }
+      if (refEl) {
+        // Save the index of the new element.
+        referenceElementIndex = refElIndex;
+        // Set new element to observe.
+        observer.observe(refEl);
+        // Save a reference to the new element.
+        referenceElement = refEl;
+        // Also set the arrow again in case it was hidden from before.
+        langTipContainer.style.setProperty('--tip-arrow-size', globalTipArrowSize + 'px');
+      } else {
+        // Set as undefined since no reference HTML element from the array was found.
+        referenceElementIndex = undefined;
+        // If there is no element the arrow will be hidden.
+        langTipContainer.style.setProperty('--tip-arrow-size', 0);
+      }
+    }
+    setContainerAbsolutePosition(refEl);
+  }
+
+  
+  /**
+   * This doesnt check the value of the CSS visibility, so it could not be visible but take up space.
+   * true also for elements positioned out of the flow and out of the flow and widnwo.
+   * @param {HTMLElement} el 
+   */
+  function elementTakesUpSpace(el) {
+    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
   }
 
 
   /**
    * Creates the HTML structure of the tooltip with all the data.
    * @param {Object} langCodeObj The language object for the suggested language with the contents to populate the container.
-   * @param {string} url The url of the equivalent page in the suggested language. 
-   * @param {number} tipArrowSize Size in pixels of the tooltip arrow.
+   * @param {string} url The url of the equivalent page in the suggested language.
    * @returns {HTMLDivElement} The HTML tooltip element.
    */
-  function createLanguageTooltip(langCodeObj, url, tipArrowSize) {
+  function createLanguageTooltip(langCodeObj, url) {
     const container = document.createElement('div');
     container.classList.add('language-tip');
     // Event listener to close the container.
     container.addEventListener('click', e => {
       if (e.target.closest('.close-btn') !== null) removeTooltip();
     });
-    container.style.setProperty('--tip-arrow-size', tipArrowSize + 'px');
     container.innerHTML = `
       <svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2">
         <line x1="0" y1="0" x2="15" y2="15" />
@@ -181,8 +245,10 @@
    * Removes the tooltip HTML element from the DOM and all its related events listeners.
    */
   function removeTooltip() {
-    window.removeEventListener('scroll', setContainerAbsolutePosition);
-    window.removeEventListener('resize', setContainerAbsolutePosition);
+    window.removeEventListener('scroll', updatePosition);
+    window.removeEventListener('resize', updatePosition);
+    observer.disconnect();
+    observer = null;
     langTipContainer.remove();
   }
   
@@ -210,11 +276,11 @@
       }
       const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
       // Assigns a reference to the tooltip HTML element.
-      langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl, globalTipArrowSize);
+      langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl);
       // Sets the absolute position based on the position of another HTML element in the DOM.
-      setContainerAbsolutePosition(langTipContainer, themeData.referenceElements, 130, 10);      
-      window.addEventListener('scroll', setContainerAbsolutePosition);
-      window.addEventListener('resize', setContainerAbsolutePosition);
+      updatePosition();      
+      window.addEventListener('scroll', updatePosition);
+      window.addEventListener('resize', updatePosition);
       langTipContainer.classList.add('hidden');
       document.body.appendChild(langTipContainer);
       window.setTimeout(() => {
