@@ -8,7 +8,10 @@
 
 ☐ If no reference HTML element is found the scroll event listener could be removed? To make script more efficient.
 
+☐ ResizeObserver doesn't exist in old Edge. Check if it exists first. @critical 
+
 ☐ When starting scrolling down updatePosition is called simultaneously from scroll event and resizeObserver making it display wrong on Chrome. @high 
+  Use transform property instead?
 
 ☐ Two seconds delay before it appears. It works locally but not on the deployed.
 

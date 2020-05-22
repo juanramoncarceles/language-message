@@ -237,6 +237,7 @@
       <span>${langCodeObj.sentence}</span>
       <a href="${url}" ${themeData.buttonStyle ? `class="${themeData.buttonStyle}"` : ''} style="margin:10px 0;">${langCodeObj.button}</a>
       <div class="dont-show-again"><input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span></div>`;
+    container.style.willChange = 'top, right';
     return container;
   }
 
