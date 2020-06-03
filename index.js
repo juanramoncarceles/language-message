@@ -166,7 +166,7 @@
   /**
    * The ResizeObserver for the current target HTML element.
    */
-  const observer = new ResizeObserver(updatePosition);
+  let observer = new ResizeObserver(updatePosition);
   
 
   // updates the current reference element which is necessary for the resize oberver, is the first one in the list that "is visilbe"
@@ -225,18 +225,41 @@
   function createLanguageTooltip(langCodeObj, url) {
     const container = document.createElement('div');
     container.classList.add('language-tip');
-    // Event listener to close the container.
-    container.addEventListener('click', e => {
-      if (e.target.closest('.close-btn') !== null) removeTooltip();
-    });
-    container.innerHTML = `
-      <svg class="close-btn" viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2">
-        <line x1="0" y1="0" x2="15" y2="15" />
-        <line x1="0" y1="15" x2="15" y2="0" />
-      </svg>
-      <span>${langCodeObj.sentence}</span>
-      <a href="${url}" ${themeData.buttonStyle ? `class="${themeData.buttonStyle}"` : ''} style="margin:10px 0;">${langCodeObj.button}</a>
-      <div class="dont-show-again"><input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span></div>`;
+    // Close button.
+    const closeBtn = document.createElement('div');
+    closeBtn.classList.add('close-btn');
+    closeBtn.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
+    closeBtn.onclick = () => {
+      if (container.querySelector('input').checked) {
+        setCookie("dontAskLang_Test", "true_Test");
+      }
+      removeTooltip();
+    };
+    container.appendChild(closeBtn);
+    // Sentence.
+    const sentence = document.createElement('span');
+    sentence.textContent = langCodeObj.sentence;
+    container.appendChild(sentence);
+    // Change language button.
+    const changeLangBtn = document.createElement('a');
+    changeLangBtn.href = url;
+    changeLangBtn.textContent = langCodeObj.button;
+    changeLangBtn.style.margin = '10px 0';
+    if (themeData.buttonStyle) changeLangBtn.classList.add(themeData.buttonStyle);
+    changeLangBtn.onclick = () => {
+      if (container.querySelector('input').checked) {
+        setCookie("dontAskLang_Test", "true_Test");
+        setCookie("preferredLang_Test", langCodeObj.browserCode);
+      }
+      removeTooltip();
+    };
+    container.appendChild(changeLangBtn);
+    // Input to dont show again tooltip.
+    const dontShowAgain = document.createElement('div');
+    dontShowAgain.classList.add('dont-show-again');
+    dontShowAgain.innerHTML = `<input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span>`;
+    container.appendChild(dontShowAgain);
+    // Optimize css changes.
     container.style.willChange = 'top, right';
     return container;
   }
@@ -253,6 +276,61 @@
     langTipContainer.remove();
   }
   
+
+  /**
+   * Sets a cookie for the current page (current path).
+   * @param {string} cname 
+   * @param {string} cvalue 
+   * @param {number} exdays 
+   */
+  function setCookie(cname, cvalue, exdays) {
+    let expires;
+    if (exdays) {
+      const d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      expires = `expires=${d.toUTCString()};`;
+    }
+    document.cookie = `${cname}=${cvalue};${expires ? expires : ''}samesite=lax;path=/`;
+  }
+
+
+  /**
+   * Gets a cookie.
+   * @param {string} cname 
+   * @returns {string}
+   */
+  // function getCookie(cname) {
+  //   const name = cname + '=';
+  //   const decodedCookie = decodeURIComponent(document.cookie);
+  //   const cookieArr = decodedCookie.split(';');
+  //   for(let i = 0; i <cookieArr.length; i++) {
+  //     let c = cookieArr[i];
+  //     while (c.charAt(0) == ' ') {
+  //       c = c.substring(1);
+  //     }
+  //     if (c.indexOf(name) == 0) {
+  //       return c.substring(name.length, c.length);
+  //     }
+  //   }
+  //   return "";
+  // }
+
+  function getCookie2(cname) {
+    keyValue = document.cookie.split('; ').find(row => row.startsWith(cname));
+    return keyValue ? keyValue.split('=')[1] : '';
+  }
+
+  //var cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)test2\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+
+  /**
+   * Name of the cookie to delete from the current page (current path).
+   * @param {string} cname The name of the cookie to delete.
+   */
+  function deleteCookie(cname) {
+    document.cookie = `${cname}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  }
+
 
   /**
    * Main function.

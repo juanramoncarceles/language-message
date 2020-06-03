@@ -1,8 +1,8 @@
 ☐ Add cookies @high 
-  If the user clicks on the link, then the language on the link is stored as 'preferredLang'
-  Next time if the website url is not in that language it will be redirected automatically.
-
-  If the user clicks on 'Don't ask me again', a cookie is stored dontAskLang=true so this doens't run.
+  If the user checks the 'Don't ask me again' and clicks either the close or the link a cookie is stored dontAskLang=true
+    If the user clicks the cross nothing more is done.
+    If the user clicks on the link then the language on the link (browser lang) is stored as 'preferredLang'
+  Next time, if the website url doesn't match with the browser and the cookie dontAskLang=true is set the tooltip won't show. Then if also the 'preferredLang' is set it will be redirected using its value.
 
   document.cookie = "dontAskLang=true;preferredLang=es";
 
