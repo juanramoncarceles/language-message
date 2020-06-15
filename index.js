@@ -93,6 +93,10 @@
    * Default right position in pixels in case no reference HTML element is found.
    */
   const tooltipDefaultRight = 10;
+  /**
+   * Amount of days until the tooltip will appear again in case the user already made a decision.
+   */
+  const cookieExpirationDays = 30;
 
 
   /************************************************** SCRIPT **************************************************/
@@ -231,7 +235,7 @@
     closeBtn.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
       if (container.querySelector('input').checked) {
-        setCookie("dontAskLang_Test", "true_Test");
+        setCookie("dontAskLang", "true", cookieExpirationDays);
       }
       removeTooltip();
     };
@@ -248,8 +252,8 @@
     if (themeData.buttonStyle) changeLangBtn.classList.add(themeData.buttonStyle);
     changeLangBtn.onclick = () => {
       if (container.querySelector('input').checked) {
-        setCookie("dontAskLang_Test", "true_Test");
-        setCookie("preferredLang_Test", langCodeObj.browserCode);
+        setCookie("dontAskLang", "true", cookieExpirationDays);
+        setCookie("preferredLang", langCodeObj.browserCode, cookieExpirationDays);
       }
       removeTooltip();
     };
@@ -279,9 +283,9 @@
 
   /**
    * Sets a cookie for the current page (current path).
-   * @param {string} cname 
-   * @param {string} cvalue 
-   * @param {number} exdays 
+   * @param {string} cname The name of the cookie.
+   * @param {string} cvalue The value of the cookie.
+   * @param {number} exdays (Optional) The amount of days until it expires. If not set it will last only until the browser is closed.
    */
   function setCookie(cname, cvalue, exdays) {
     let expires;
@@ -295,36 +299,17 @@
 
 
   /**
-   * Gets a cookie.
-   * @param {string} cname 
-   * @returns {string}
+   * Gets the value of a cookie by its name. If the cookie does not exist it returns an empty string.
+   * @param {string} cname The name of the cookie to get the value of.
    */
-  // function getCookie(cname) {
-  //   const name = cname + '=';
-  //   const decodedCookie = decodeURIComponent(document.cookie);
-  //   const cookieArr = decodedCookie.split(';');
-  //   for(let i = 0; i <cookieArr.length; i++) {
-  //     let c = cookieArr[i];
-  //     while (c.charAt(0) == ' ') {
-  //       c = c.substring(1);
-  //     }
-  //     if (c.indexOf(name) == 0) {
-  //       return c.substring(name.length, c.length);
-  //     }
-  //   }
-  //   return "";
-  // }
-
-  function getCookie2(cname) {
+  function getCookie(cname) {
     keyValue = document.cookie.split('; ').find(row => row.startsWith(cname));
     return keyValue ? keyValue.split('=')[1] : '';
   }
 
-  //var cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)test2\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-
 
   /**
-   * Name of the cookie to delete from the current page (current path).
+   * Deletes a cookie from the current page (current path).
    * @param {string} cname The name of the cookie to delete.
    */
   function deleteCookie(cname) {
@@ -338,34 +323,48 @@
    * and if so it shows it.
    */
   function main() {
+    const preferredLang = getCookie('preferredLang');
+    const dontAsk = getCookie('dontAskLang') === 'true' ? true : false;
+    const urlLangIndex = getUrlLangIndex();
+    const browserLangIndex = getBrowserLangIndex();
     // If the getBrowserLangIndex() returns -1 means that we have no website language that matches, so nothing is done.
     // If the browser lang is available on the website and it is different than the one on the url then suggest to change it.
-    if (getBrowserLangIndex() !== -1 && getBrowserLangIndex() !== getUrlLangIndex()) {
-      // Language object with the browser language.
-      const browserLangCodeObj = languagesData[getBrowserLangIndex()];
-      const newUrlLangCode = browserLangCodeObj.urlCode;
-      let urlPathname;
-      if (languagesData[getUrlLangIndex()].urlCode !== '') {
-        const pathRegExp = new RegExp('^\/' + languagesData[getUrlLangIndex()].urlCode + '(\/.+)');
-        // Remove the current lang code on the url.
-        urlPathnameRes = window.location.pathname.match(pathRegExp);
-        urlPathname = urlPathnameRes !== null ? urlPathnameRes[1] : '/';
-      } else {
-        urlPathname = window.location.pathname;
+    if ((preferredLang && languagesData.findIndex(lData => preferredLang === lData.browserCode) !== urlLangIndex) || (browserLangIndex !== -1 && browserLangIndex !== urlLangIndex)) {
+      if (preferredLang || !dontAsk) {
+        // CREATION OF THE NEW URL.
+        // Language object with the browser language.
+        const browserLangCodeObj = languagesData[browserLangIndex];
+        const newUrlLangCode = browserLangCodeObj.urlCode;
+        let urlPathname;
+        if (languagesData[urlLangIndex].urlCode !== '') {
+          const pathRegExp = new RegExp('^\/' + languagesData[urlLangIndex].urlCode + '(\/.+)');
+          // Remove the current lang code on the url.
+          urlPathnameRes = window.location.pathname.match(pathRegExp);
+          urlPathname = urlPathnameRes !== null ? urlPathnameRes[1] : '/';
+        } else {
+          urlPathname = window.location.pathname;
+        }
+        const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
+        if (dontAsk) {
+          // REDIRECTION TO THE NEW URL.
+          // The initial page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
+          window.location.replace(newUrl);
+        } else {
+          // SHOW THE TOOLTIP.
+          // Assigns a reference to the tooltip HTML element.
+          langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl);
+          // Sets the absolute position based on the position of another HTML element in the DOM.
+          updatePosition();      
+          window.addEventListener('scroll', updatePosition);
+          window.addEventListener('resize', updatePosition);
+          langTipContainer.classList.add('hidden');
+          document.body.appendChild(langTipContainer);
+          window.setTimeout(() => {
+            langTipContainer.classList.remove('hidden');
+          }, 2500);
+        }
       }
-      const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
-      // Assigns a reference to the tooltip HTML element.
-      langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl);
-      // Sets the absolute position based on the position of another HTML element in the DOM.
-      updatePosition();      
-      window.addEventListener('scroll', updatePosition);
-      window.addEventListener('resize', updatePosition);
-      langTipContainer.classList.add('hidden');
-      document.body.appendChild(langTipContainer);
-      window.setTimeout(() => {
-        langTipContainer.classList.remove('hidden');
-      }, 2500);
-    } else if (getBrowserLangIndex() === -1) {
+    } else if (browserLangIndex === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");
     }
   }
