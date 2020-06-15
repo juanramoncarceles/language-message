@@ -1,0 +1,47 @@
+/* STYLES OF THE SAMPLE PAGE TO TEST */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 200vh;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  position: sticky;
+  top: 0;
+  margin: auto;
+  max-width: 900px;  
+  background-color: lightgrey;
+}
+
+header > span:last-child {
+  padding: 0.5rem;
+  transition: line-height 1s;
+  line-height: 3.5rem;
+  background-color: gray;
+}
+
+header.fixed > span:last-child {
+  line-height: 1.5rem;
+}
+
+.test-item {
+  width: 50px;
+  height: 50px;
+  background-color: #c0bfa0;
+  position: absolute;
+  top: 300px;
+  left: 50%;
+}
+
+@media (max-width: 550px) {
+  header > span:last-child {
+    display: none;
+  }
+}
