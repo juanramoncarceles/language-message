@@ -37,25 +37,11 @@
       remember: 'Non mostrare di nuovo'
     },
     {
-      urlCode: 'de',
-      browserCode: 'de',
-      sentence: 'Diese Seite ist auf Deutsch verfügbar',
-      button: 'Ansicht auf Deutsch',
-      remember: 'Nicht mehr zeigen'
-    },
-    {
       urlCode: 'zh-hans',
       browserCode: 'zh',
       sentence: '此页面有中文版本',
       button: '用中文查看',
       remember: '不再显示'
-    },
-    {
-      urlCode: 'ko',
-      browserCode: 'ko',
-      sentence: '이 페이지는 한국어로 제공됩니다',
-      button: '한국어로보기',
-      remember: '다시 표시하지 않습니다'
     },
     {
       urlCode: '',
@@ -170,7 +156,12 @@
   /**
    * The ResizeObserver for the current target HTML element.
    */
-  let observer = new ResizeObserver(updatePosition);
+  let observer;
+  if (window.ResizeObserver) {
+    observer = new ResizeObserver(updatePosition);
+  } else {
+    console.warn("Your browser does not support ResizeObserver.");
+  }
   
 
   // updates the current reference element which is necessary for the resize oberver, is the first one in the list that "is visilbe"
@@ -188,13 +179,13 @@
     if (referenceElementIndex !== refElIndex) {
       if (referenceElementIndex !== undefined) {
         // Remove the current observed element.
-        observer.unobserve(referenceElement); // If I stop observing then if it reappears it will no be called.
+        if (observer) observer.unobserve(referenceElement); // If I stop observing then if it reappears it will no be called.
       }
       if (refEl) {
         // Save the index of the new element.
         referenceElementIndex = refElIndex;
         // Set new element to observe.
-        observer.observe(refEl);
+        if (observer) observer.observe(refEl);
         // Save a reference to the new element.
         referenceElement = refEl;
         // Also set the arrow again in case it was hidden from before.
@@ -275,7 +266,7 @@
   function removeTooltip() {
     window.removeEventListener('scroll', updatePosition);
     window.removeEventListener('resize', updatePosition);
-    observer.disconnect();
+    if (observer) observer.disconnect();
     observer = null;
     langTipContainer.remove();
   }

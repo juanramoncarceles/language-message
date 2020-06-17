@@ -1,6 +1,6 @@
 ☐ If no reference HTML element is found the scroll event listener could be removed? To make script more efficient.
 
-☐ ResizeObserver doesn't exist in old Edge. Check if it exists first and use a library instead (https://github.com/juggle/resize-observer). @critical 
+☐ ResizeObserver doesn't exist in old Edge, use a library instead (https://github.com/juggle/resize-observer). @critical 
 
 ☐ Use transform instead of top left for better performance because they don't cause repaint?
 
