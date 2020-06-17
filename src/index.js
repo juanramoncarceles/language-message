@@ -318,6 +318,29 @@
 
 
   /**
+   * Creates the new url for the current page with the specified language.
+   * This function will access the window.location object.
+   * @param {number} currentUrlLangObjIndex The index of the language object in the url in the languagesData array.
+   * @param {number} newLangCodeObjIndex The index of the new language object in the languagesData array.
+   * @returns {string} The new url.
+   */
+  function createNewUrl(currentUrlLangObjIndex, newLangCodeObjIndex) {
+    const currentUrlLangCode = languagesData[currentUrlLangObjIndex].urlCode;
+    const newUrlLangCode = languagesData[newLangCodeObjIndex].urlCode;
+    let urlPathname;
+    if (currentUrlLangCode !== '') {
+      const pathRegExp = new RegExp('^\/' + currentUrlLangCode + '(\/.+)');
+      // Remove the current lang code on the url.
+      const urlPathnameRes = window.location.pathname.match(pathRegExp);
+      urlPathname = urlPathnameRes !== null ? urlPathnameRes[1] : '/';
+    } else {
+      urlPathname = window.location.pathname;
+    }
+    return window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
+  }
+
+
+  /**
    * Main function.
    * Checks if a tooltip for redirection to the page in another language is necessary
    * and if so it shows it.
@@ -327,43 +350,33 @@
     const dontAsk = getCookie('dontAskLang') === 'true' ? true : false;
     const urlLangIndex = getUrlLangIndex();
     const browserLangIndex = getBrowserLangIndex();
-    // If the getBrowserLangIndex() returns -1 means that we have no website language that matches, so nothing is done.
-    // If the browser lang is available on the website and it is different than the one on the url then suggest to change it.
-    if ((preferredLang && languagesData.findIndex(lData => preferredLang === lData.browserCode) !== urlLangIndex) || (browserLangIndex !== -1 && browserLangIndex !== urlLangIndex)) {
-      if (preferredLang || !dontAsk) {
-        // CREATION OF THE NEW URL.
-        // Language object with the browser language.
-        const browserLangCodeObj = languagesData[browserLangIndex];
-        const newUrlLangCode = browserLangCodeObj.urlCode;
-        let urlPathname;
-        if (languagesData[urlLangIndex].urlCode !== '') {
-          const pathRegExp = new RegExp('^\/' + languagesData[urlLangIndex].urlCode + '(\/.+)');
-          // Remove the current lang code on the url.
-          urlPathnameRes = window.location.pathname.match(pathRegExp);
-          urlPathname = urlPathnameRes !== null ? urlPathnameRes[1] : '/';
-        } else {
-          urlPathname = window.location.pathname;
-        }
-        const newUrl = window.location.origin + (newUrlLangCode !== '' ? "/" + newUrlLangCode : '') + urlPathname;
-        if (dontAsk) {
-          // REDIRECTION TO THE NEW URL.
-          // The initial page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
-          window.location.replace(newUrl);
-        } else {
-          // SHOW THE TOOLTIP.
-          // Assigns a reference to the tooltip HTML element.
-          langTipContainer = createLanguageTooltip(browserLangCodeObj, newUrl);
-          // Sets the absolute position based on the position of another HTML element in the DOM.
-          updatePosition();      
-          window.addEventListener('scroll', updatePosition);
-          window.addEventListener('resize', updatePosition);
-          langTipContainer.classList.add('hidden');
-          document.body.appendChild(langTipContainer);
-          window.setTimeout(() => {
-            langTipContainer.classList.remove('hidden');
-          }, 2500);
-        }
+    // If there is a preferred languaged saved it will try to redirect to the page in that language.
+    // If there is no preferred language and the user didn't say to don't ask again it will check if
+    // it is necessary to show the tooltip by checking the browser language with the url language.
+    const preferredLangIndex = languagesData.findIndex(lData => preferredLang === lData.browserCode); // TODO if the index of the preferred lang is -1 it fails
+    if (preferredLang && preferredLangIndex !== -1) {
+      if (preferredLangIndex !== urlLangIndex) {
+        // Creation of the new url.
+        const newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
+        // Redirection to the new url.
+        // The initial page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
+        window.location.replace(newUrl);
       }
+    } else if (!dontAsk && browserLangIndex !== -1 && browserLangIndex !== urlLangIndex) {
+      // SHOW THE TOOLTIP.
+      // Creation of the new url.
+      const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
+      // Assigns a reference to the tooltip HTML element.
+      langTipContainer = createLanguageTooltip(languagesData[browserLangIndex], newUrl);
+      // Sets the absolute position based on the position of another HTML element in the DOM.
+      updatePosition();      
+      window.addEventListener('scroll', updatePosition);
+      window.addEventListener('resize', updatePosition);
+      langTipContainer.classList.add('hidden');
+      document.body.appendChild(langTipContainer);
+      window.setTimeout(() => {
+        langTipContainer.classList.remove('hidden');
+      }, 2500);
     } else if (browserLangIndex === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");
     }
