@@ -66,7 +66,9 @@
     buttonStyle: 'ast-button'
   }
 
-  const mode = 'centered or anchored';
+
+  // TODO Add option to position it centered or anchored to another element.
+  // const mode = 'centered or anchored';
 
   const config = {
     backgroundColor: '#f3f3f3',
@@ -229,7 +231,6 @@
     container.classList.add('language-tip');
     // Close button.
     const closeBtn = document.createElement('div');
-    //closeBtn.classList.add('close-btn');
     closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;cursor:pointer;';
     closeBtn.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
@@ -259,13 +260,24 @@
     container.appendChild(changeLangBtn);
     // Input to dont show again tooltip.
     const dontShowAgain = document.createElement('div');
-    //dontShowAgain.classList.add('dont-show-again');
     dontShowAgain.style.cssText = 'display:flex;align-items:center;';
     dontShowAgain.innerHTML = `<input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span>`;
     container.appendChild(dontShowAgain);
-    // Optimize css changes.
-    //container.style.willChange = 'top, right';
-    container.style.cssText = `will-change:top,right;position:absolute;z-index:${config.zIndex};display:flex;flex-direction:column;align-items:center;padding:32px 14px 14px;transition:opacity 1s;border-radius:${config.borderRadius};background-color:${config.backgroundColor};filter:drop-shadow(0px 0px 5px #a1a1a1);`;
+    // Container css.
+    container.style.cssText = `
+      will-change:top,right;
+      position:absolute;
+      z-index:${config.zIndex};
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      opacity:0;
+      visibility:hidden;
+      padding:32px 14px 14px;
+      transition:opacity 1s;
+      border-radius:${config.borderRadius};
+      background-color:${config.backgroundColor};
+      filter:drop-shadow(0px 0px 5px #a1a1a1);`;
     return container;
   }
 
@@ -342,6 +354,7 @@
 
 
   // Styles for the tooltip arrow.
+  // Cannot be inlined since it targets a pseudo element.
   const tipCSSStyleRule = `
     .language-tip::after {
       content: " ";
@@ -380,7 +393,7 @@
       }
     } else if (!dontAsk && browserLangIndex !== -1 && browserLangIndex !== urlLangIndex) {
       // SHOW THE TOOLTIP.
-      // Append styles for the arrow.
+      // Append styles for the tooltip arrow.
       const tipCSSStyle = document.createElement('style');
       document.head.appendChild(tipCSSStyle);
       tipCSSStyle.sheet.insertRule(tipCSSStyleRule);
@@ -392,10 +405,10 @@
       updatePosition();      
       window.addEventListener('scroll', updatePosition);
       window.addEventListener('resize', updatePosition);
-      langTipContainer.classList.add('hidden');
       document.body.appendChild(langTipContainer);
       window.setTimeout(() => {
-        langTipContainer.classList.remove('hidden');
+        langTipContainer.style.opacity = "1";
+        langTipContainer.style.visibility = "visible";
       }, 2500);
     } else if (browserLangIndex === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");

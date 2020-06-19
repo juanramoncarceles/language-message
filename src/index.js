@@ -264,7 +264,20 @@
     dontShowAgain.innerHTML = `<input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span>`;
     container.appendChild(dontShowAgain);
     // Container css.
-    container.style.cssText = `will-change:top,right;position:absolute;z-index:${config.zIndex};display:flex;flex-direction:column;align-items:center;padding:32px 14px 14px;transition:opacity 1s;border-radius:${config.borderRadius};background-color:${config.backgroundColor};filter:drop-shadow(0px 0px 5px #a1a1a1);`;
+    container.style.cssText = `
+      will-change:top,right;
+      position:absolute;
+      z-index:${config.zIndex};
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      opacity:0;
+      visibility:hidden;
+      padding:32px 14px 14px;
+      transition:opacity 1s;
+      border-radius:${config.borderRadius};
+      background-color:${config.backgroundColor};
+      filter:drop-shadow(0px 0px 5px #a1a1a1);`;
     return container;
   }
 
@@ -392,10 +405,10 @@
       updatePosition();      
       window.addEventListener('scroll', updatePosition);
       window.addEventListener('resize', updatePosition);
-      langTipContainer.classList.add('hidden');
       document.body.appendChild(langTipContainer);
       window.setTimeout(() => {
-        langTipContainer.classList.remove('hidden');
+        langTipContainer.style.opacity = "1";
+        langTipContainer.style.visibility = "visible";
       }, 2500);
     } else if (browserLangIndex === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");
