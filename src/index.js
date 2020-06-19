@@ -67,6 +67,15 @@
   }
 
 
+  // TODO Add option to position it centered or anchored to another element.
+  // const mode = 'centered or anchored';
+
+  const config = {
+    backgroundColor: '#f3f3f3',
+    borderRadius: '5px',
+    zIndex: 98
+  }
+
   /**
    * Tooltip arrow size in pixels.
    */
@@ -222,7 +231,7 @@
     container.classList.add('language-tip');
     // Close button.
     const closeBtn = document.createElement('div');
-    closeBtn.classList.add('close-btn');
+    closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;cursor:pointer;';
     closeBtn.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
       if (container.querySelector('input').checked) {
@@ -251,11 +260,11 @@
     container.appendChild(changeLangBtn);
     // Input to dont show again tooltip.
     const dontShowAgain = document.createElement('div');
-    dontShowAgain.classList.add('dont-show-again');
+    dontShowAgain.style.cssText = 'display:flex;align-items:center;';
     dontShowAgain.innerHTML = `<input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span>`;
     container.appendChild(dontShowAgain);
-    // Optimize css changes.
-    container.style.willChange = 'top, right';
+    // Container css.
+    container.style.cssText = `will-change:top,right;position:absolute;z-index:${config.zIndex};display:flex;flex-direction:column;align-items:center;padding:32px 14px 14px;transition:opacity 1s;border-radius:${config.borderRadius};background-color:${config.backgroundColor};filter:drop-shadow(0px 0px 5px #a1a1a1);`;
     return container;
   }
 
@@ -331,6 +340,22 @@
   }
 
 
+  // Styles for the tooltip arrow.
+  // Cannot be inlined since it targets a pseudo element.
+  const tipCSSStyleRule = `
+    .language-tip::after {
+      content: " ";
+      position: absolute;
+      bottom: 100%;
+      right: var(--right-distance, 50%);
+      margin-right: calc(var(--tip-arrow-size, 0) * -1);
+      border-width: var(--tip-arrow-size, 0);
+      border-style: solid;
+      border-color: transparent transparent ${config.backgroundColor} transparent;
+    }
+  `;
+
+
   /**
    * Main function.
    * Checks if a tooltip for redirection to the page in another language is necessary
@@ -355,6 +380,10 @@
       }
     } else if (!dontAsk && browserLangIndex !== -1 && browserLangIndex !== urlLangIndex) {
       // SHOW THE TOOLTIP.
+      // Append styles for the tooltip arrow.
+      const tipCSSStyle = document.createElement('style');
+      document.head.appendChild(tipCSSStyle);
+      tipCSSStyle.sheet.insertRule(tipCSSStyleRule);
       // Creation of the new url.
       const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
       // Assigns a reference to the tooltip HTML element.
