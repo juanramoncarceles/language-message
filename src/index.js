@@ -61,42 +61,40 @@
    * @property {string} buttonStyle Optional CSS class to style the main anchor element. An empty string if none.
    * @example 'ast-button'
    */
-  //const themeData = {
-    //referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'],
-    //buttonStyle: 'ast-button'
-  //}
 
-
-  // TODO Add option to position it centered or anchored to another element.
-  // const mode = 'centered or anchored';
+  // TODO add automatic redirect option true or false.
+  // If autoRedirect is set to true it is recommended to save the cookie also from another place to allow change the preferred lang
 
   const config = {
-    mode: 'centered', // 'centered' | 'anchored'
+    mode: 'anchored', // 'centered' | 'anchored'
+    // autoRedirect: false,
     referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'], // only required when mode anchored is set
     buttonClassName: 'ast-button',
+    delay: 2500,
     cssStyle: {
       backgroundColor: '#f3f3f3',
       borderRadius: '5px',
       zIndex: 98
-    }
+    },
+    /**
+     * Tooltip arrow size in pixels.
+     */
+    globalTipArrowSize: 8,
+    /**
+     * Default top position in pixels in case no reference HTML element is found.
+     */
+    tooltipDefaultTop: 10,
+    /**
+     * Default right position in pixels in case no reference HTML element is found.
+     */
+    tooltipDefaultRight: 10,
+    /**
+     * Amount of days until the tooltip will appear again in case the user already made a decision.
+     */
+    cookieExpirationDays: 30
   }
 
-  /**
-   * Tooltip arrow size in pixels.
-   */
-  const globalTipArrowSize = 8;
-  /**
-   * Default top position in pixels in case no reference HTML element is found.
-   */
-  const tooltipDefaultTop = 10;
-  /**
-   * Default right position in pixels in case no reference HTML element is found.
-   */
-  const tooltipDefaultRight = 10;
-  /**
-   * Amount of days until the tooltip will appear again in case the user already made a decision.
-   */
-  const cookieExpirationDays = 30;
+
 
 
   /************************************************** SCRIPT **************************************************/
@@ -158,11 +156,11 @@
       // Container arrow position.
       langTipContainer.style.setProperty('--right-distance', refElementBoundingRect.width / 2 + 'px');
       // Container position.
-      langTipContainer.style.top = refElementBoundingRect.bottom + globalTipArrowSize + window.scrollY + 'px';
+      langTipContainer.style.top = refElementBoundingRect.bottom + config.globalTipArrowSize + window.scrollY + 'px';
       langTipContainer.style.right = window.innerWidth - (refElementBoundingRect.right) + 'px';
     } else {
-      langTipContainer.style.top = tooltipDefaultTop + 'px';
-      langTipContainer.style.right = tooltipDefaultRight + 'px';
+      langTipContainer.style.top = config.tooltipDefaultTop + 'px';
+      langTipContainer.style.right = config.tooltipDefaultRight + 'px';
     }
   }
   
@@ -203,7 +201,7 @@
         // Save a reference to the new element.
         referenceElement = refEl;
         // Also set the arrow again in case it was hidden from before.
-        langTipContainer.style.setProperty('--tip-arrow-size', globalTipArrowSize + 'px');
+        langTipContainer.style.setProperty('--tip-arrow-size', config.globalTipArrowSize + 'px');
       } else {
         // Set as undefined since no reference HTML element from the array was found.
         referenceElementIndex = undefined;
@@ -240,7 +238,7 @@
     closeBtn.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
       if (container.querySelector('input').checked) {
-        setCookie("dontAskLang", "true", cookieExpirationDays);
+        setCookie("dontAskLang", "true", config.cookieExpirationDays);
       }
       removeTooltip();
     };
@@ -257,8 +255,8 @@
     if (config.buttonClassName) changeLangBtn.classList.add(config.buttonClassName);
     changeLangBtn.onclick = () => {
       if (container.querySelector('input').checked) {
-        setCookie("dontAskLang", "true", cookieExpirationDays);
-        setCookie("preferredLang", langCodeObj.browserCode, cookieExpirationDays);
+        setCookie("dontAskLang", "true", config.cookieExpirationDays);
+        setCookie("preferredLang", langCodeObj.browserCode, config.cookieExpirationDays);
       }
       removeTooltip();
     };
@@ -270,16 +268,10 @@
     container.appendChild(dontShowAgain);
     // Container css.
     container.style.cssText = `
-      will-change:top,right;
-      position:absolute;
-      z-index:${config.cssStyle.zIndex};
       display:flex;
       flex-direction:column;
       align-items:center;
-      opacity:0;
-      visibility:hidden;
       padding:32px 14px 14px;
-      transition:opacity 1s;
       border-radius:${config.cssStyle.borderRadius};
       background-color:${config.cssStyle.backgroundColor};
       filter:drop-shadow(0px 0px 5px #a1a1a1);`;
@@ -379,6 +371,23 @@
 
 
   /**
+   * Sets a delay and/or transition in an HTML element display.
+   * @param {HTMLElement} HTMLElement the target HTML element.
+   * @param {number} delay delay in milliseconds.
+   * @param {number} transition transition duration in seconds.
+   */
+  function setDelay(HTMLElement, delay, transition = 1) {
+    HTMLElement.style.opacity = "0";
+    HTMLElement.style.transition = `opacity ${transition}s`;
+    HTMLElement.style.visibility = "hidden";
+    window.setTimeout(() => {
+      HTMLElement.style.opacity = "1";
+      HTMLElement.style.visibility = "visible";
+    }, delay);
+  }
+
+
+  /**
    * Main function.
    * Checks if a tooltip for redirection to the page in another language is necessary
    * and if so it shows it.
@@ -415,6 +424,11 @@
         updatePosition();      
         window.addEventListener('scroll', updatePosition);
         window.addEventListener('resize', updatePosition);
+        // Styles specific for the anchored mode tooltip.
+        langTipContainer.style.willChange = "top,right";
+        langTipContainer.style.position = "absolute";
+        langTipContainer.style.zIndex = config.cssStyle.zIndex;
+        setDelay(langTipContainer, config.delay, 1);
         document.body.appendChild(langTipContainer);
       } else if (config.mode === 'centered') {
         const wrapper = document.createElement('div');
@@ -429,17 +443,13 @@
           top: 0;
           background-color: rgba(128, 128, 128, 0.5);
         `;
-        wrapper.onclick = removeTooltip;
+        wrapper.onclick = e => {if (e.target === wrapper) removeTooltip();}
         wrapper.appendChild(langTipContainer);
+        setDelay(wrapper, config.delay, 1);
         document.body.appendChild(wrapper);
       } else {
         console.warn('config.mode should be set to either anchored or centered');
       }
-      // TODO This should be set to the outer container always?
-      window.setTimeout(() => {
-        langTipContainer.style.opacity = "1";
-        langTipContainer.style.visibility = "visible";
-      }, 2500);
     } else if (browserLangIndex === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");
     }

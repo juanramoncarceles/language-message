@@ -61,19 +61,16 @@
    * @property {string} buttonStyle Optional CSS class to style the main anchor element. An empty string if none.
    * @example 'ast-button'
    */
-  //const themeData = {
-    //referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'],
-    //buttonStyle: 'ast-button'
-  //}
 
-
-  // TODO Add option to position it centered or anchored to another element.
-  // const mode = 'centered or anchored';
+  // TODO add automatic redirect option true or false.
+  // If autoRedirect is set to true it is recommended to save the cookie also from another place to allow change the preferred lang
 
   const config = {
-    mode: 'centered', // 'centered' | 'anchored'
+    mode: 'anchored', // 'centered' | 'anchored'
+    // autoRedirect: false,
     referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'], // only required when mode anchored is set
     buttonClassName: 'ast-button',
+    delay: 2500,
     cssStyle: {
       backgroundColor: '#f3f3f3',
       borderRadius: '5px',
@@ -81,6 +78,7 @@
     }
   }
 
+  // TODO Add these to the config object.
   /**
    * Tooltip arrow size in pixels.
    */
@@ -270,16 +268,10 @@
     container.appendChild(dontShowAgain);
     // Container css.
     container.style.cssText = `
-      will-change:top,right;
-      position:absolute;
-      z-index:${config.cssStyle.zIndex};
       display:flex;
       flex-direction:column;
       align-items:center;
-      opacity:0;
-      visibility:hidden;
       padding:32px 14px 14px;
-      transition:opacity 1s;
       border-radius:${config.cssStyle.borderRadius};
       background-color:${config.cssStyle.backgroundColor};
       filter:drop-shadow(0px 0px 5px #a1a1a1);`;
@@ -415,6 +407,21 @@
         updatePosition();      
         window.addEventListener('scroll', updatePosition);
         window.addEventListener('resize', updatePosition);
+        // Styles specific for the anchored mode tooltip.
+        langTipContainer.style.willChange = "top,right";
+        langTipContainer.style.position = "absolute";
+        langTipContainer.style.zIndex = config.cssStyle.zIndex;
+        // Set delay.
+        setDelay(langTipContainer, config.delay, 1);
+        // if (config.delay) {
+        //   langTipContainer.style.opacity = "0";
+        //   langTipContainer.style.transition = "opacity 1s";
+        //   langTipContainer.style.visibility = "hidden";
+        //   window.setTimeout(() => {
+        //     langTipContainer.style.opacity = "1";
+        //     langTipContainer.style.visibility = "visible";
+        //   }, config.delay);
+        // }
         document.body.appendChild(langTipContainer);
       } else if (config.mode === 'centered') {
         const wrapper = document.createElement('div');
@@ -429,20 +436,43 @@
           top: 0;
           background-color: rgba(128, 128, 128, 0.5);
         `;
-        wrapper.onclick = removeTooltip;
+        wrapper.onclick = e => {if (e.target === wrapper) removeTooltip();}
         wrapper.appendChild(langTipContainer);
+        // Set delay.
+        //if (config.delay !== undefined)
+        setDelay(wrapper, config.delay, 1);
+        // if (config.delay) {
+        //   wrapper.style.opacity = "0";
+        //   wrapper.style.transition = "opacity 1s";
+        //   wrapper.style.visibility = "hidden";
+        //   window.setTimeout(() => {
+        //     wrapper.style.opacity = "1";
+        //     wrapper.style.visibility = "visible";
+        //   }, config.delay);
+        // }
         document.body.appendChild(wrapper);
       } else {
         console.warn('config.mode should be set to either anchored or centered');
       }
-      // TODO This should be set to the outer container always?
-      window.setTimeout(() => {
-        langTipContainer.style.opacity = "1";
-        langTipContainer.style.visibility = "visible";
-      }, 2500);
     } else if (browserLangIndex === -1) {
       console.warn("Sorry but we don't have our website in your browser's language.");
     }
+  }
+
+  /**
+   * Sets a delay and/or transition in an HTML element display.
+   * @param {HTMLElement} HTMLElement the target HTML element.
+   * @param {number} delay delay in milliseconds.
+   * @param {number} transition transition duration in seconds.
+   */
+  function setDelay(HTMLElement, delay, transition = 1) {
+    HTMLElement.style.opacity = "0";
+    HTMLElement.style.transition = `opacity ${transition}s`;
+    HTMLElement.style.visibility = "hidden";
+    window.setTimeout(() => {
+      HTMLElement.style.opacity = "1";
+      HTMLElement.style.visibility = "visible";
+    }, delay);
   }
 
   window.addEventListener('load', main);
