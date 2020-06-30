@@ -1,0 +1,19 @@
+Cambiar el mecanismo al siguiente:
+
+Se guarda una preferencia de idioma, por ejemplo 'es', y si entra con cualquier otro por ejemplo inglés, te pregunta si quieres ir al español o si quieres quedarte en el inglés. Si digo quedarme en el inglés entonces se guarda un nuevo valor 'en'.
+Si el idioma de la página coincide con el de la preferencia no se hace nada, si es diferente entonces aparece el mensaje.
+
+
+Basculer vers Français
+Rester dans English
+
+Switch to English
+Stay in Español
+
+Cambiar a Español
+Quedarse en English
+
+
+https://www.microsoft.com/fr-fr/microsoft-365/microsoft-office?rtc=1
+
+Si tiene el navegador en español y lo ve en inglés le dirá si quiere verlo en español o continuar en ingles. Si elije continuar en ingles entonces se guardara ingles. La proxima vez que entre en ingles no dira nada pero si entra en cualquier otro idioma como italiano le dira si quiere verlo en ingles o quedarse en italiano y guardar el italiano como nuevo idioma.

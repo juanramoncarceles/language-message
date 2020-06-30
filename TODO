@@ -1,4 +1,4 @@
-☐ Change format to just two buttons: "Ver en Español", "Continue in English", and in both cases it saves a cookie with the selected option. The cross does nothing, just closes.
+☐ Change format to just two buttons: "Ver en Español", "Continue in English", and in both cases? it saves a cookie with the selected option. The cross does nothing, just closes.
 
 ☐ If no reference HTML element is found the scroll event listener could be removed? To make script more efficient.
 

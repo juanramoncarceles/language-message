@@ -61,19 +61,24 @@
    * @property {string} buttonStyle Optional CSS class to style the main anchor element. An empty string if none.
    * @example 'ast-button'
    */
-  const themeData = {
-    referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'],
-    buttonStyle: 'ast-button'
-  }
+  //const themeData = {
+    //referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'],
+    //buttonStyle: 'ast-button'
+  //}
 
 
   // TODO Add option to position it centered or anchored to another element.
   // const mode = 'centered or anchored';
 
   const config = {
-    backgroundColor: '#f3f3f3',
-    borderRadius: '5px',
-    zIndex: 98
+    mode: 'centered', // 'centered' | 'anchored'
+    referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'], // only required when mode anchored is set
+    buttonClassName: 'ast-button',
+    cssStyle: {
+      backgroundColor: '#f3f3f3',
+      borderRadius: '5px',
+      zIndex: 98
+    }
   }
 
   /**
@@ -177,8 +182,8 @@
   function updatePosition() {
     let refEl;
     let refElIndex;
-    for (let i = 0; i < themeData.referenceElements.length; i++) {
-      refEl = document.querySelector(themeData.referenceElements[i]);
+    for (let i = 0; i < config.referenceElements.length; i++) {
+      refEl = document.querySelector(config.referenceElements[i]);
       if (refEl && elementTakesUpSpace(refEl)) {
         refElIndex = i;
         break;
@@ -249,7 +254,7 @@
     changeLangBtn.href = url;
     changeLangBtn.textContent = langCodeObj.button;
     changeLangBtn.style.margin = '10px 0';
-    if (themeData.buttonStyle) changeLangBtn.classList.add(themeData.buttonStyle);
+    if (config.buttonClassName) changeLangBtn.classList.add(config.buttonClassName);
     changeLangBtn.onclick = () => {
       if (container.querySelector('input').checked) {
         setCookie("dontAskLang", "true", cookieExpirationDays);
@@ -267,7 +272,7 @@
     container.style.cssText = `
       will-change:top,right;
       position:absolute;
-      z-index:${config.zIndex};
+      z-index:${config.cssStyle.zIndex};
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -275,8 +280,8 @@
       visibility:hidden;
       padding:32px 14px 14px;
       transition:opacity 1s;
-      border-radius:${config.borderRadius};
-      background-color:${config.backgroundColor};
+      border-radius:${config.cssStyle.borderRadius};
+      background-color:${config.cssStyle.backgroundColor};
       filter:drop-shadow(0px 0px 5px #a1a1a1);`;
     return container;
   }
@@ -290,7 +295,11 @@
     window.removeEventListener('resize', updatePosition);
     if (observer) observer.disconnect();
     observer = null;
-    langTipContainer.remove();
+    if (langTipContainer.parentElement.dataset.tooltipWrapper === 'true') {
+      langTipContainer.parentElement.remove();
+    } else {
+      langTipContainer.remove();
+    }
   }
   
 
@@ -364,7 +373,7 @@
       margin-right: calc(var(--tip-arrow-size, 0) * -1);
       border-width: var(--tip-arrow-size, 0);
       border-style: solid;
-      border-color: transparent transparent ${config.backgroundColor} transparent;
+      border-color: transparent transparent ${config.cssStyle.backgroundColor} transparent;
     }
   `;
 
@@ -401,11 +410,32 @@
       const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
       // Assigns a reference to the tooltip HTML element.
       langTipContainer = createLanguageTooltip(languagesData[browserLangIndex], newUrl);
-      // Sets the absolute position based on the position of another HTML element in the DOM.
-      updatePosition();      
-      window.addEventListener('scroll', updatePosition);
-      window.addEventListener('resize', updatePosition);
-      document.body.appendChild(langTipContainer);
+      if (config.mode === 'anchored') {
+        // Sets the absolute position based on the position of another HTML element in the DOM.
+        updatePosition();      
+        window.addEventListener('scroll', updatePosition);
+        window.addEventListener('resize', updatePosition);
+        document.body.appendChild(langTipContainer);
+      } else if (config.mode === 'centered') {
+        const wrapper = document.createElement('div');
+        wrapper.dataset.tooltipWrapper = 'true';
+        wrapper.style.cssText = `
+          position: fixed;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100vw;
+          height: 100vh;
+          top: 0;
+          background-color: rgba(128, 128, 128, 0.5);
+        `;
+        wrapper.onclick = removeTooltip;
+        wrapper.appendChild(langTipContainer);
+        document.body.appendChild(wrapper);
+      } else {
+        console.warn('config.mode should be set to either anchored or centered');
+      }
+      // TODO This should be set to the outer container always?
       window.setTimeout(() => {
         langTipContainer.style.opacity = "1";
         langTipContainer.style.visibility = "visible";
