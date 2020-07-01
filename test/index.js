@@ -11,7 +11,8 @@
    * @property {string} urlCode Lang code used in the website url (without the slashes). Leave as empty string for the language that corresponds to the url without any code.
    * @property {string} browserCode The two first characters of the official browser lang code. https://www.metamodpro.com/browser-language-codes
    * @property {string} sentence First string on the tooltip. For example: 'This page is available in English'
-   * @property {string} button Text content for the main button. For example: 'View in English'
+   * @property {string} redirectButton Text content for the button to redirect. For example: 'View in English'
+   * @property {string} stayButton Text content for the button to stay. For example: 'Stay in English'
    * @property {string} remember Label for the checkboc to don't show again the tooltip. For example: 'Don't show again'
    */
   const languagesData = [
@@ -19,35 +20,40 @@
       urlCode: 'es',
       browserCode: 'es',
       sentence: 'Esta página está disponible en Español',
-      button: 'Ver en Español',
+      redirectButton: 'Ver en Español',
+      stayButton: 'Quedarse en Español',
       remember: 'No volver a mostrar'
     },
     {
       urlCode: 'fr',
       browserCode: 'fr',
       sentence: 'Cette page est disponible en français',
-      button: 'Voir en Français',
+      redirectButton: 'Voir en Français',
+      stayButton: 'Rester dans Français',
       remember: 'Ne montre plus'
     },
     {
       urlCode: 'it',
       browserCode: 'it',
       sentence: 'Questa web è disponibile in Italiano',
-      button: 'Vedere in Italiano',
+      redirectButton: 'Vedere in Italiano',
+      stayButton: 'Rimanere in Italiano',
       remember: 'Non mostrare di nuovo'
     },
     {
       urlCode: 'zh-hans',
       browserCode: 'zh',
       sentence: '此页面有中文版本',
-      button: '用中文查看',
+      redirectButton: '用中文查看',
+      stayButton: '保持中文',
       remember: '不再显示'
     },
     {
       urlCode: '',
       browserCode: 'en',
       sentence: 'This page is available in English',
-      button: 'View in English',
+      redirectButton: 'View in English',
+      stayButton: 'Stay in English',
       remember: 'Don\'t show again'
     }
   ];
@@ -67,7 +73,6 @@
 
   const config = {
     mode: 'anchored', // 'centered' | 'anchored'
-    // autoRedirect: false,
     referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'], // only required when mode anchored is set
     buttonClassName: 'ast-button',
     delay: 2500,
@@ -75,26 +80,30 @@
       backgroundColor: '#f3f3f3',
       borderRadius: '5px',
       zIndex: 98
-    }
+    },
+    /**
+     * If true message wont show again, and if a language was selected it will redirect.
+     */
+    useDontAskAgainCheckbox: true,
+    /**
+     * Tooltip arrow size in pixels.
+     */
+    globalTipArrowSize: 8,
+    /**
+     * Default top position in pixels in case no reference HTML element is found.
+     */
+    tooltipDefaultTop: 10,
+    /**
+     * Default right position in pixels in case no reference HTML element is found.
+     */
+    tooltipDefaultRight: 10,
+    /**
+     * Amount of days until the tooltip will appear again in case the user already made a decision.
+     */
+    cookieExpirationDays: 30
   }
 
-  // TODO Add these to the config object.
-  /**
-   * Tooltip arrow size in pixels.
-   */
-  const globalTipArrowSize = 8;
-  /**
-   * Default top position in pixels in case no reference HTML element is found.
-   */
-  const tooltipDefaultTop = 10;
-  /**
-   * Default right position in pixels in case no reference HTML element is found.
-   */
-  const tooltipDefaultRight = 10;
-  /**
-   * Amount of days until the tooltip will appear again in case the user already made a decision.
-   */
-  const cookieExpirationDays = 30;
+
 
 
   /************************************************** SCRIPT **************************************************/
@@ -156,11 +165,11 @@
       // Container arrow position.
       langTipContainer.style.setProperty('--right-distance', refElementBoundingRect.width / 2 + 'px');
       // Container position.
-      langTipContainer.style.top = refElementBoundingRect.bottom + globalTipArrowSize + window.scrollY + 'px';
+      langTipContainer.style.top = refElementBoundingRect.bottom + config.globalTipArrowSize + window.scrollY + 'px';
       langTipContainer.style.right = window.innerWidth - (refElementBoundingRect.right) + 'px';
     } else {
-      langTipContainer.style.top = tooltipDefaultTop + 'px';
-      langTipContainer.style.right = tooltipDefaultRight + 'px';
+      langTipContainer.style.top = config.tooltipDefaultTop + 'px';
+      langTipContainer.style.right = config.tooltipDefaultRight + 'px';
     }
   }
   
@@ -201,7 +210,7 @@
         // Save a reference to the new element.
         referenceElement = refEl;
         // Also set the arrow again in case it was hidden from before.
-        langTipContainer.style.setProperty('--tip-arrow-size', globalTipArrowSize + 'px');
+        langTipContainer.style.setProperty('--tip-arrow-size', config.globalTipArrowSize + 'px');
       } else {
         // Set as undefined since no reference HTML element from the array was found.
         referenceElementIndex = undefined;
@@ -225,11 +234,12 @@
 
   /**
    * Creates the HTML structure of the tooltip with all the data.
-   * @param {Object} langCodeObj The language object for the suggested language with the contents to populate the container.
+   * @param {Object} newLangObj The language object for the suggested language with the contents to populate the container.
+   * @param {Object} pageLangObj The language object for the page language with the contents to populate the container.
    * @param {string} url The url of the equivalent page in the suggested language.
    * @returns {HTMLDivElement} The HTML tooltip element.
    */
-  function createLanguageTooltip(langCodeObj, url) {
+  function createLanguageTooltip(newLangObj, pageLangObj, url) {
     const container = document.createElement('div');
     container.classList.add('language-tip');
     // Close button.
@@ -237,35 +247,52 @@
     closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;cursor:pointer;';
     closeBtn.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
-      if (container.querySelector('input').checked) {
-        setCookie("dontAskLang", "true", cookieExpirationDays);
+      const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
+      if (dontAskAgainCheckbox && dontAskAgainCheckbox.checked) {
+        setCookie("dontAskLang", "true", config.cookieExpirationDays);
       }
       removeTooltip();
     };
     container.appendChild(closeBtn);
     // Sentence.
     const sentence = document.createElement('span');
-    sentence.textContent = langCodeObj.sentence;
+    sentence.textContent = newLangObj.sentence;
     container.appendChild(sentence);
-    // Change language button.
-    const changeLangBtn = document.createElement('a');
-    changeLangBtn.href = url;
-    changeLangBtn.textContent = langCodeObj.button;
-    changeLangBtn.style.margin = '10px 0';
-    if (config.buttonClassName) changeLangBtn.classList.add(config.buttonClassName);
-    changeLangBtn.onclick = () => {
-      if (container.querySelector('input').checked) {
-        setCookie("dontAskLang", "true", cookieExpirationDays);
-        setCookie("preferredLang", langCodeObj.browserCode, cookieExpirationDays);
+    // Redirect to change language button.
+    const redirectBtn = document.createElement('a');
+    redirectBtn.href = url;
+    redirectBtn.textContent = newLangObj.redirectButton;
+    redirectBtn.style.margin = '10px 0';
+    if (config.buttonClassName) redirectBtn.classList.add(config.buttonClassName);
+    redirectBtn.onclick = () => {
+      const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
+      if (dontAskAgainCheckbox && dontAskAgainCheckbox.checked) {
+        setCookie("dontAskLang", "true", config.cookieExpirationDays);
       }
+      setCookie("preferredLang", newLangObj.browserCode, config.cookieExpirationDays);
       removeTooltip();
     };
-    container.appendChild(changeLangBtn);
-    // Input to dont show again tooltip.
-    const dontShowAgain = document.createElement('div');
-    dontShowAgain.style.cssText = 'display:flex;align-items:center;';
-    dontShowAgain.innerHTML = `<input type="checkbox" style="margin: 0 5px 0 0;"><span>${langCodeObj.remember}</span>`;
-    container.appendChild(dontShowAgain);
+    container.appendChild(redirectBtn);
+    // Stay button.
+    const stayBtn = document.createElement('button');
+    stayBtn.textContent = pageLangObj.stayButton;
+    stayBtn.onclick = () => {
+      const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
+      if (dontAskAgainCheckbox && dontAskAgainCheckbox.checked) {
+        setCookie("dontAskLang", "true", config.cookieExpirationDays);
+      }
+      setCookie("preferredLang", pageLangObj.browserCode, config.cookieExpirationDays);
+      removeTooltip();
+    }
+    container.appendChild(stayBtn);
+
+    // Checkbox to dont show again tooltip.
+    if (config.useDontAskAgainCheckbox) {
+      const dontShowAgain = document.createElement('div');
+      dontShowAgain.style.cssText = 'display:flex;align-items:center;';
+      dontShowAgain.innerHTML = `<input id="confirm-checkbox" type="checkbox" style="margin: 0 5px 0 0;"><span>${newLangObj.remember}</span>`;
+      container.appendChild(dontShowAgain);
+    }
     // Container css.
     container.style.cssText = `
       display:flex;
@@ -371,6 +398,66 @@
 
 
   /**
+   * Sets a delay and/or transition in an HTML element display.
+   * @param {HTMLElement} HTMLElement the target HTML element.
+   * @param {number} delay delay in milliseconds.
+   * @param {number} transition transition duration in seconds.
+   */
+  function setElementDisplayDelay(HTMLElement, delay, transition = 1) {
+    HTMLElement.style.opacity = "0";
+    HTMLElement.style.transition = `opacity ${transition}s`;
+    HTMLElement.style.visibility = "hidden";
+    window.setTimeout(() => {
+      HTMLElement.style.opacity = "1";
+      HTMLElement.style.visibility = "visible";
+    }, delay);
+  }
+
+
+  /**
+   * Sets the position mode based on the config.mode value: 'anchored' or 'centered'
+   */
+  function setElementPositionMode() {
+    // Setting the mode based on the config.
+    if (config.mode === 'anchored') {
+      // Sets the absolute position based on the position of another HTML element in the DOM.
+      // Append styles for the tooltip arrow.
+      const tipCSSStyle = document.createElement('style');
+      document.head.appendChild(tipCSSStyle);
+      tipCSSStyle.sheet.insertRule(tipCSSStyleRule);
+      updatePosition();      
+      window.addEventListener('scroll', updatePosition);
+      window.addEventListener('resize', updatePosition);
+      // Styles specific for the anchored mode tooltip.
+      langTipContainer.style.willChange = "top,right";
+      langTipContainer.style.position = "absolute";
+      langTipContainer.style.zIndex = config.cssStyle.zIndex;
+      setElementDisplayDelay(langTipContainer, config.delay, 1);
+      document.body.appendChild(langTipContainer);
+    } else if (config.mode === 'centered') {
+      const wrapper = document.createElement('div');
+      wrapper.dataset.tooltipWrapper = 'true';
+      wrapper.style.cssText = `
+        position: fixed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        background-color: rgba(128, 128, 128, 0.5);
+      `;
+      wrapper.onclick = e => {if (e.target === wrapper) removeTooltip();}
+      wrapper.appendChild(langTipContainer);
+      setElementDisplayDelay(wrapper, config.delay, 1);
+      document.body.appendChild(wrapper);
+    } else {
+      console.warn('config.mode should be set to either anchored or centered');
+    }
+  }
+
+
+  /**
    * Main function.
    * Checks if a tooltip for redirection to the page in another language is necessary
    * and if so it shows it.
@@ -380,99 +467,98 @@
     const dontAsk = getCookie('dontAskLang') === 'true' ? true : false;
     const urlLangIndex = getUrlLangIndex();
     const browserLangIndex = getBrowserLangIndex();
-    // If there is a preferred languaged saved it will try to redirect to the page in that language.
-    // If there is no preferred language and the user didn't say to don't ask again it will check if
-    // it is necessary to show the tooltip by checking the browser language with the url language.
-    const preferredLangIndex = languagesData.findIndex(lData => preferredLang === lData.browserCode); // TODO if the index of the preferred lang is -1 it fails
-    if (preferredLang && preferredLangIndex !== -1) {
+    // Check the index of the preferredLang, if it is -1 the page is not available in this lang.
+    const preferredLangIndex = languagesData.findIndex(lData => preferredLang === lData.browserCode);
+    if (dontAsk) {
+      if (preferredLang && preferredLangIndex !== -1) {
+        // If url lang doesnt match with preferredLang redirect.
+        if (preferredLangIndex !== urlLangIndex) {
+          // Creation of the new url.
+          const newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
+          // Redirection to the new url.
+          // The initial page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
+          window.location.replace(newUrl);
+        }
+      }
+    } else if (preferredLang && preferredLangIndex !== -1) {
+      // If url lang doesnt match with the saved preferredLang.
       if (preferredLangIndex !== urlLangIndex) {
-        // Creation of the new url.
+        // Get the new lang data.
         const newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
-        // Redirection to the new url.
-        // The initial page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
-        window.location.replace(newUrl);
+        const proposedLangObject = languagesData[preferredLangIndex];
+        // Assign a reference to the tooltip HTML element.
+        langTipContainer = createLanguageTooltip(proposedLangObject, languagesData[urlLangIndex], newUrl);
+        setElementPositionMode();
       }
-    } else if (!dontAsk && browserLangIndex !== -1 && browserLangIndex !== urlLangIndex) {
-      // SHOW THE TOOLTIP.
-      // Append styles for the tooltip arrow.
-      const tipCSSStyle = document.createElement('style');
-      document.head.appendChild(tipCSSStyle);
-      tipCSSStyle.sheet.insertRule(tipCSSStyleRule);
-      // Creation of the new url.
-      const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
-      // Assigns a reference to the tooltip HTML element.
-      langTipContainer = createLanguageTooltip(languagesData[browserLangIndex], newUrl);
-      if (config.mode === 'anchored') {
-        // Sets the absolute position based on the position of another HTML element in the DOM.
-        updatePosition();      
-        window.addEventListener('scroll', updatePosition);
-        window.addEventListener('resize', updatePosition);
-        // Styles specific for the anchored mode tooltip.
-        langTipContainer.style.willChange = "top,right";
-        langTipContainer.style.position = "absolute";
-        langTipContainer.style.zIndex = config.cssStyle.zIndex;
-        // Set delay.
-        setDelay(langTipContainer, config.delay, 1);
-        // if (config.delay) {
-        //   langTipContainer.style.opacity = "0";
-        //   langTipContainer.style.transition = "opacity 1s";
-        //   langTipContainer.style.visibility = "hidden";
-        //   window.setTimeout(() => {
-        //     langTipContainer.style.opacity = "1";
-        //     langTipContainer.style.visibility = "visible";
-        //   }, config.delay);
-        // }
-        document.body.appendChild(langTipContainer);
-      } else if (config.mode === 'centered') {
-        const wrapper = document.createElement('div');
-        wrapper.dataset.tooltipWrapper = 'true';
-        wrapper.style.cssText = `
-          position: fixed;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100vw;
-          height: 100vh;
-          top: 0;
-          background-color: rgba(128, 128, 128, 0.5);
-        `;
-        wrapper.onclick = e => {if (e.target === wrapper) removeTooltip();}
-        wrapper.appendChild(langTipContainer);
-        // Set delay.
-        //if (config.delay !== undefined)
-        setDelay(wrapper, config.delay, 1);
-        // if (config.delay) {
-        //   wrapper.style.opacity = "0";
-        //   wrapper.style.transition = "opacity 1s";
-        //   wrapper.style.visibility = "hidden";
-        //   window.setTimeout(() => {
-        //     wrapper.style.opacity = "1";
-        //     wrapper.style.visibility = "visible";
-        //   }, config.delay);
-        // }
-        document.body.appendChild(wrapper);
-      } else {
-        console.warn('config.mode should be set to either anchored or centered');
+    } else if (browserLangIndex !== -1) {
+      if (preferredLang && preferredLangIndex === -1) {
+        console.warn(`Sorry, we don't have our website in ${preferredLang}.`);
       }
-    } else if (browserLangIndex === -1) {
-      console.warn("Sorry but we don't have our website in your browser's language.");
+      // If url lang doesnt match with the browserLang.
+      if (browserLangIndex !== urlLangIndex) {
+        // Get the new lang data.
+        const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
+        const proposedLangObject = languagesData[browserLangIndex];
+        // Assign a reference to the tooltip HTML element.
+        langTipContainer = createLanguageTooltip(proposedLangObject, languagesData[urlLangIndex], newUrl);
+        setElementPositionMode();
+      }
+    } else if ((preferredLang && preferredLangIndex === -1) || browserLangIndex === -1) {
+      console.warn(`Sorry, we don't have our website in ${preferredLang ? preferredLang : (navigator.language || navigator.userLanguage)}.`);
     }
-  }
 
-  /**
-   * Sets a delay and/or transition in an HTML element display.
-   * @param {HTMLElement} HTMLElement the target HTML element.
-   * @param {number} delay delay in milliseconds.
-   * @param {number} transition transition duration in seconds.
-   */
-  function setDelay(HTMLElement, delay, transition = 1) {
-    HTMLElement.style.opacity = "0";
-    HTMLElement.style.transition = `opacity ${transition}s`;
-    HTMLElement.style.visibility = "hidden";
-    window.setTimeout(() => {
-      HTMLElement.style.opacity = "1";
-      HTMLElement.style.visibility = "visible";
-    }, delay);
+    // if (preferredLang && preferredLangIndex !== -1) {
+    //   if (preferredLangIndex !== urlLangIndex) {
+    //     // Creation of the new url.
+    //     const newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
+    //     // Redirection to the new url.
+    //     // The initial page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
+    //     window.location.replace(newUrl);
+    //   }
+    // } else if (!dontAsk && browserLangIndex !== -1 && browserLangIndex !== urlLangIndex) {
+    //   // SHOW THE TOOLTIP.
+    //   // Creation of the new url.
+    //   const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
+    //   // Assigns a reference to the tooltip HTML element.
+    //   langTipContainer = createLanguageTooltip(languagesData[browserLangIndex], newUrl);
+    //   if (config.mode === 'anchored') {
+    //     // Sets the absolute position based on the position of another HTML element in the DOM.
+    //     // Append styles for the tooltip arrow.
+    //     const tipCSSStyle = document.createElement('style');
+    //     document.head.appendChild(tipCSSStyle);
+    //     tipCSSStyle.sheet.insertRule(tipCSSStyleRule);
+    //     updatePosition();      
+    //     window.addEventListener('scroll', updatePosition);
+    //     window.addEventListener('resize', updatePosition);
+    //     // Styles specific for the anchored mode tooltip.
+    //     langTipContainer.style.willChange = "top,right";
+    //     langTipContainer.style.position = "absolute";
+    //     langTipContainer.style.zIndex = config.cssStyle.zIndex;
+    //     setElementDisplayDelay(langTipContainer, config.delay, 1);
+    //     document.body.appendChild(langTipContainer);
+    //   } else if (config.mode === 'centered') {
+    //     const wrapper = document.createElement('div');
+    //     wrapper.dataset.tooltipWrapper = 'true';
+    //     wrapper.style.cssText = `
+    //       position: fixed;
+    //       display: flex;
+    //       align-items: center;
+    //       justify-content: center;
+    //       width: 100vw;
+    //       height: 100vh;
+    //       top: 0;
+    //       background-color: rgba(128, 128, 128, 0.5);
+    //     `;
+    //     wrapper.onclick = e => {if (e.target === wrapper) removeTooltip();}
+    //     wrapper.appendChild(langTipContainer);
+    //     setElementDisplayDelay(wrapper, config.delay, 1);
+    //     document.body.appendChild(wrapper);
+    //   } else {
+    //     console.warn('config.mode should be set to either anchored or centered');
+    //   }
+    // } else if (browserLangIndex === -1) {
+    //   console.warn("Sorry but we don't have our website in your browser's language.");
+    // }
   }
 
   window.addEventListener('load', main);
