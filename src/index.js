@@ -1,7 +1,7 @@
 (function () {
   /**
    * This script works by checking the value of the language code found in the current url (window.location) against the language set on the browser.
-   * The language code in the url of the site is expected to be located after the origin and at the begining of the path:
+   * The language code in the url of the site should be located after the origin and at the begining of the path:
    *   www.example.com/LANG/rest/of/the/path
    */
 
@@ -10,10 +10,10 @@
    * For each language object set:
    * @property {string} urlCode Lang code used in the website url (without the slashes). Leave as empty string for the language that corresponds to the url without any code.
    * @property {string} browserCode The two first characters of the official browser lang code. https://www.metamodpro.com/browser-language-codes
-   * @property {string} sentence First string on the tooltip. For example: 'This page is available in English'
+   * @property {string} sentence First string on the message box. For example: 'This page is available in English'
    * @property {string} redirectButton Text content for the button to redirect. For example: 'View in English'
    * @property {string} stayButton Text content for the button to stay. For example: 'Stay in English'
-   * @property {string} remember Label for the checkboc to don't show again the tooltip. For example: 'Don't show again'
+   * @property {string} remember Label for the checkbox to don't show again the message box. For example: 'Don't show again'
    */
   const languagesData = [
     {
@@ -40,6 +40,22 @@
       stayButton: 'Rimanere in Italiano',
       remember: 'Non mostrare di nuovo'
     },
+    // {
+    //   urlCode: 'de',
+    //   browserCode: 'de',
+    //   sentence: 'Diese Seite ist auf Deutsch verfügbar',
+    //   redirectButton: 'Ansicht auf Deutsch',
+    //   stayButton: 'Bleib auf Deutsch.',
+    //   remember: 'Nicht mehr zeigen'
+    // },
+    // {
+    //   urlCode: 'ko',
+    //   browserCode: 'ko',
+    //   sentence: '이 페이지는 한국어로 제공됩니다',
+    //   redirectButton: '한국어로보기',
+    //   stayButton: '한국어로 유지하십시오',
+    //   remember: '다시 표시하지 않습니다'
+    // },
     {
       urlCode: 'zh-hans',
       browserCode: 'zh',
@@ -60,46 +76,59 @@
 
 
   /**
-   * Theme specific data to place and style the tooltip.
-   * @property {string[]} referenceElements CSS classes or ids to place the tooltip below the element where they are.
-   * Should be in order of preference. If they are classes, the first one that is find is the one that will be used.
-   * @example ['.wpml-ls-current-language', '.ast-mobile-menu-buttons']
-   * @property {string} buttonStyle Optional CSS class to style the main anchor element. An empty string if none.
-   * @example 'ast-button'
+   * ******************************************** CONFIGURATION ************************************************
    */
 
-  // TODO add automatic redirect option true or false.
-  // If autoRedirect is set to true it is recommended to save the cookie also from another place to allow change the preferred lang
-
   const config = {
-    mode: 'centered', // 'centered' | 'anchored'
-    referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'], // only required when mode anchored is set
+    /**
+     * Modes can be: 'centered' | 'anchored'. First to place it in the center of the window, second to place it relative to another HTMLElement as a tooltip.
+     */
+    mode: 'centered',
+    /**
+     * Array of CSS classes or ids to place the container relative to. Only required when mode is set to 'anchored'.
+     * If more than one they should be in order of preference, and the first one that is find is the one that will be used.
+     * For example: ['.first-element', '.second-element']
+     */
+    referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'],
+    /**
+     * Optional CSS class to style the button to redirect (HTMLAnchorElement). For example: 'ast-button'.
+     */
     redirectBtnClassName: 'theme-button',
+    /**
+     * Optional CSS class to style the button to stay (HTMLButtonElement). For example: 'ast-button'.
+     */
     stayBtnClassName: '',
-    delay: 2500,
-    cssStyle: { // Main container style.
+    /**
+     * Delay in milliseconds to display the message box.
+     */
+    displayDelay: 2500,
+    /**
+     * Main container styles.
+     */
+    cssStyle: {
       backgroundColor: '#f3f3f3',
       borderRadius: '5px',
       zIndex: 98
     },
     /**
-     * If true message wont show again, and if a language was selected it will redirect.
+     * If true message won't show again, and if a language is selected by clicking one of the buttons it will redirect automatically next time.
+     * If this is used it is recommended to also save the preferredLang cookie from another place in the website, like buttons to switch the language.
      */
     useDontAskAgainCheckbox: false,
     /**
-     * Tooltip arrow size in pixels.
+     * When mode is 'anchored' it will appear like a tooltip relative to a referenceElement. This sets the tooltip arrow size in pixels.
      */
-    globalTipArrowSize: 8,
+    tooltipArrowSize: 8,
     /**
-     * Default top position in pixels in case no reference HTML element is found.
+     * When mode is 'anchored' this will be the default CSS top position in pixels in case no referenceElement is found.
      */
     tooltipDefaultTop: 10,
     /**
-     * Default right position in pixels in case no reference HTML element is found.
+     * When mode is 'anchored' this will be the default CSS right position in pixels in case no referenceElement is found.
      */
     tooltipDefaultRight: 10,
     /**
-     * Amount of days until the tooltip will appear again in case the user already made a decision.
+     * Amount of days the cookies with the language preference data will last.
      */
     cookieExpirationDays: 30
   }
@@ -110,15 +139,15 @@
   /************************************************** SCRIPT **************************************************/
 
   /**
-   * Reference to the tooltip HTML element.
+   * Reference to the message box HTML element.
    */
-  let langTipContainer;
+  let messageBoxContainer;
   /**
    * Index of the current string in the referenceElements array.
    */
   let referenceElementIndex;
   /**
-   * Reference to the HTML element used to position the tooltip.
+   * Reference to the HTML element used to position the message box.
    */
   let referenceElement;
 
@@ -164,13 +193,13 @@
     if (el !== null) {
       const refElementBoundingRect = el.getBoundingClientRect();      
       // Container arrow position.
-      langTipContainer.style.setProperty('--right-distance', refElementBoundingRect.width / 2 + 'px');
+      messageBoxContainer.style.setProperty('--right-distance', refElementBoundingRect.width / 2 + 'px');
       // Container position.
-      langTipContainer.style.top = refElementBoundingRect.bottom + config.globalTipArrowSize + window.scrollY + 'px';
-      langTipContainer.style.right = window.innerWidth - (refElementBoundingRect.right) + 'px';
+      messageBoxContainer.style.top = refElementBoundingRect.bottom + config.tooltipArrowSize + window.scrollY + 'px';
+      messageBoxContainer.style.right = window.innerWidth - (refElementBoundingRect.right) + 'px';
     } else {
-      langTipContainer.style.top = config.tooltipDefaultTop + 'px';
-      langTipContainer.style.right = config.tooltipDefaultRight + 'px';
+      messageBoxContainer.style.top = config.tooltipDefaultTop + 'px';
+      messageBoxContainer.style.right = config.tooltipDefaultRight + 'px';
     }
   }
   
@@ -211,12 +240,12 @@
         // Save a reference to the new element.
         referenceElement = refEl;
         // Also set the arrow again in case it was hidden from before.
-        langTipContainer.style.setProperty('--tip-arrow-size', config.globalTipArrowSize + 'px');
+        messageBoxContainer.style.setProperty('--tip-arrow-size', config.tooltipArrowSize + 'px');
       } else {
         // Set as undefined since no reference HTML element from the array was found.
         referenceElementIndex = undefined;
         // If there is no element the arrow will be hidden.
-        langTipContainer.style.setProperty('--tip-arrow-size', 0);
+        messageBoxContainer.style.setProperty('--tip-arrow-size', 0);
       }
     }
     setContainerAbsolutePosition(refEl);
@@ -243,13 +272,13 @@
 
 
   /**
-   * Creates the HTML structure of the tooltip with all the data.
+   * Creates the HTML structure of the message box with all the data.
    * @param {Object} newLangObj The language object for the suggested language with the contents to populate the container.
    * @param {Object} pageLangObj The language object for the page language with the contents to populate the container.
    * @param {string} url The url of the equivalent page in the suggested language.
-   * @returns {HTMLDivElement} The HTML tooltip element.
+   * @returns {HTMLDivElement} The HTML container of the message box.
    */
-  function createLanguageTooltip(newLangObj, pageLangObj, url) {
+  function createMessageBox(newLangObj, pageLangObj, url) {
     const container = document.createElement('div');
     container.classList.add('language-tip');
     // Close button.
@@ -261,7 +290,7 @@
       if (dontAskAgainCheckbox && dontAskAgainCheckbox.checked) {
         setCookie("dontAskLang", "true", config.cookieExpirationDays);
       }
-      removeTooltip();
+      removeMessageBox();
     };
     container.appendChild(closeBtn);
     // Sentence.
@@ -299,7 +328,7 @@
         setCookie("dontAskLang", "true", config.cookieExpirationDays);
       }
       setCookie("preferredLang", newLangObj.browserCode, config.cookieExpirationDays);
-      removeTooltip();
+      removeMessageBox();
     };
     buttonsContainer.appendChild(redirectBtn);
     // Stay button.
@@ -317,12 +346,12 @@
         setCookie("dontAskLang", "true", config.cookieExpirationDays);
       }
       setCookie("preferredLang", pageLangObj.browserCode, config.cookieExpirationDays);
-      removeTooltip();
+      removeMessageBox();
     }
     buttonsContainer.appendChild(stayBtn);
     // Buttons wrapper appended.
     container.appendChild(buttonsContainer);
-    // Checkbox to dont show again tooltip.
+    // Checkbox to don't show again the message box.
     if (config.useDontAskAgainCheckbox) {
       const dontShowAgain = document.createElement('div');
       dontShowAgain.style.cssText = 'display:flex;align-items:center;margin-top:10px;';
@@ -344,17 +373,17 @@
 
 
   /**
-   * Removes the tooltip HTML element from the DOM and all its related events listeners.
+   * Removes the message box HTML element from the DOM and all its related events listeners.
    */
-  function removeTooltip() {
+  function removeMessageBox() {
     window.removeEventListener('scroll', updatePosition);
     window.removeEventListener('resize', updatePosition);
     if (observer) observer.disconnect();
     observer = null;
-    if (langTipContainer.parentElement.dataset.tooltipWrapper === 'true') {
-      langTipContainer.parentElement.remove();
+    if (messageBoxContainer.parentElement.dataset.tooltipWrapper === 'true') {
+      messageBoxContainer.parentElement.remove();
     } else {
-      langTipContainer.remove();
+      messageBoxContainer.remove();
     }
   }
   
@@ -466,11 +495,11 @@
       window.addEventListener('scroll', updatePosition);
       window.addEventListener('resize', updatePosition);
       // Styles specific for the anchored mode tooltip.
-      langTipContainer.style.willChange = "top,right";
-      langTipContainer.style.position = "absolute";
-      langTipContainer.style.zIndex = config.cssStyle.zIndex;
-      setElementDisplayDelay(langTipContainer, config.delay, 1);
-      document.body.appendChild(langTipContainer);
+      messageBoxContainer.style.willChange = "top,right";
+      messageBoxContainer.style.position = "absolute";
+      messageBoxContainer.style.zIndex = config.cssStyle.zIndex;
+      setElementDisplayDelay(messageBoxContainer, config.displayDelay, 1);
+      document.body.appendChild(messageBoxContainer);
     } else if (config.mode === 'centered') {
       const wrapper = document.createElement('div');
       wrapper.dataset.tooltipWrapper = 'true';
@@ -484,9 +513,9 @@
         top: 0;
         background-color: rgba(128, 128, 128, 0.5);
       `;
-      wrapper.onclick = e => {if (e.target === wrapper) removeTooltip();}
-      wrapper.appendChild(langTipContainer);
-      setElementDisplayDelay(wrapper, config.delay, 1);
+      wrapper.onclick = e => {if (e.target === wrapper) removeMessageBox();}
+      wrapper.appendChild(messageBoxContainer);
+      setElementDisplayDelay(wrapper, config.displayDelay, 1);
       document.body.appendChild(wrapper);
     } else {
       console.warn('config.mode should be set to either anchored or centered');
@@ -496,8 +525,7 @@
 
   /**
    * Main function.
-   * Checks if a tooltip for redirection to the page in another language is necessary
-   * and if so it shows it.
+   * Checks if a message box for redirection to the page in another language is necessary and if so it shows it.
    */
   function main() {
     const preferredLang = getCookie('preferredLang');
@@ -523,8 +551,8 @@
         // Get the new lang data.
         const newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
         const proposedLangObject = languagesData[preferredLangIndex];
-        // Assign a reference to the tooltip HTML element.
-        langTipContainer = createLanguageTooltip(proposedLangObject, languagesData[urlLangIndex], newUrl);
+        // Assign a reference to the message box HTML element.
+        messageBoxContainer = createMessageBox(proposedLangObject, languagesData[urlLangIndex], newUrl);
         setElementPositionMode();
       }
     } else if (browserLangIndex !== -1) {
@@ -536,8 +564,8 @@
         // Get the new lang data.
         const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
         const proposedLangObject = languagesData[browserLangIndex];
-        // Assign a reference to the tooltip HTML element.
-        langTipContainer = createLanguageTooltip(proposedLangObject, languagesData[urlLangIndex], newUrl);
+        // Assign a reference to the message box HTML element.
+        messageBoxContainer = createMessageBox(proposedLangObject, languagesData[urlLangIndex], newUrl);
         setElementPositionMode();
       }
     } else if ((preferredLang && preferredLangIndex === -1) || browserLangIndex === -1) {
