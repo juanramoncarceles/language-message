@@ -72,11 +72,12 @@
   // If autoRedirect is set to true it is recommended to save the cookie also from another place to allow change the preferred lang
 
   const config = {
-    mode: 'anchored', // 'centered' | 'anchored'
+    mode: 'centered', // 'centered' | 'anchored'
     referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'], // only required when mode anchored is set
-    buttonClassName: 'ast-button',
+    redirectBtnClassName: 'theme-button',
+    stayBtnClassName: '',
     delay: 2500,
-    cssStyle: {
+    cssStyle: { // Main container style.
       backgroundColor: '#f3f3f3',
       borderRadius: '5px',
       zIndex: 98
@@ -84,7 +85,7 @@
     /**
      * If true message wont show again, and if a language was selected it will redirect.
      */
-    useDontAskAgainCheckbox: true,
+    useDontAskAgainCheckbox: false,
     /**
      * Tooltip arrow size in pixels.
      */
@@ -221,6 +222,15 @@
     setContainerAbsolutePosition(refEl);
   }
 
+  /**
+   * Applies some basic button CSS styles.
+   * @param {HTMLElement} element 
+   */
+  function setButtonBaseStyle(element) {
+    element.style.border = '1px solid';
+    element.style.padding = '6px';
+    element.style.borderRadius = '3px';
+  }
   
   /**
    * This doesnt check the value of the CSS visibility, so it could not be visible but take up space.
@@ -244,8 +254,8 @@
     container.classList.add('language-tip');
     // Close button.
     const closeBtn = document.createElement('div');
-    closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;cursor:pointer;';
-    closeBtn.innerHTML = '<svg viewBox="0 0 15 15" width="15" height="15" stroke="#585858" stroke-width="2"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
+    closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;width:0.8em;cursor:pointer;';
+    closeBtn.innerHTML = '<svg viewBox="0 0 15 15" stroke="#585858" stroke-width="2" style="display:block;"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
       const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
       if (dontAskAgainCheckbox && dontAskAgainCheckbox.checked) {
@@ -258,12 +268,31 @@
     const sentence = document.createElement('span');
     sentence.textContent = newLangObj.sentence;
     container.appendChild(sentence);
+    // Buttons container.
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.style.display = 'flex';
+    buttonsContainer.style.marginTop = '10px';
+    if (config.mode === 'anchored') {
+      buttonsContainer.style.flexDirection = 'column';
+      buttonsContainer.style.alignItems = 'center';
+    }
     // Redirect to change language button.
     const redirectBtn = document.createElement('a');
     redirectBtn.href = url;
     redirectBtn.textContent = newLangObj.redirectButton;
-    redirectBtn.style.margin = '10px 0';
-    if (config.buttonClassName) redirectBtn.classList.add(config.buttonClassName);
+    redirectBtn.style.textDecorationLine = 'none';
+    // If no CSS class has been provided for the main button apply default styles.
+    if (!config.redirectBtnClassName) {
+      redirectBtn.style.backgroundColor = '#d4d4d4';
+      setButtonBaseStyle(redirectBtn);
+    }
+    // Style mode dependent.
+    if (config.mode === 'anchored') {
+      redirectBtn.style.marginBottom = '10px';
+    } else {
+      redirectBtn.style.marginRight = '10px';
+    }
+    if (config.redirectBtnClassName) redirectBtn.classList.add(config.redirectBtnClassName);
     redirectBtn.onclick = () => {
       const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
       if (dontAskAgainCheckbox && dontAskAgainCheckbox.checked) {
@@ -272,10 +301,16 @@
       setCookie("preferredLang", newLangObj.browserCode, config.cookieExpirationDays);
       removeTooltip();
     };
-    container.appendChild(redirectBtn);
+    buttonsContainer.appendChild(redirectBtn);
     // Stay button.
     const stayBtn = document.createElement('button');
     stayBtn.textContent = pageLangObj.stayButton;
+    stayBtn.style.cursor = 'pointer';
+    stayBtn.style.fontSize = 'inherit';
+    // If no CSS class has been provided for the secondary button apply default styles.
+    if (!config.stayBtnClassName) {
+      setButtonBaseStyle(stayBtn);
+    }
     stayBtn.onclick = () => {
       const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
       if (dontAskAgainCheckbox && dontAskAgainCheckbox.checked) {
@@ -284,13 +319,14 @@
       setCookie("preferredLang", pageLangObj.browserCode, config.cookieExpirationDays);
       removeTooltip();
     }
-    container.appendChild(stayBtn);
-
+    buttonsContainer.appendChild(stayBtn);
+    // Buttons wrapper appended.
+    container.appendChild(buttonsContainer);
     // Checkbox to dont show again tooltip.
     if (config.useDontAskAgainCheckbox) {
       const dontShowAgain = document.createElement('div');
-      dontShowAgain.style.cssText = 'display:flex;align-items:center;';
-      dontShowAgain.innerHTML = `<input id="confirm-checkbox" type="checkbox" style="margin: 0 5px 0 0;"><span>${newLangObj.remember}</span>`;
+      dontShowAgain.style.cssText = 'display:flex;align-items:center;margin-top:10px;';
+      dontShowAgain.innerHTML = `<input id="confirm-checkbox" type="checkbox" style="margin: 0 5px 0 0;"><label for="confirm-checkbox">${newLangObj.remember}</label>`;
       container.appendChild(dontShowAgain);
     }
     // Container css.
@@ -299,6 +335,7 @@
       flex-direction:column;
       align-items:center;
       padding:32px 14px 14px;
+      font-family: sans-serif;
       border-radius:${config.cssStyle.borderRadius};
       background-color:${config.cssStyle.backgroundColor};
       filter:drop-shadow(0px 0px 5px #a1a1a1);`;
