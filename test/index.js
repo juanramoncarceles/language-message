@@ -83,13 +83,13 @@
     /**
      * Modes can be: 'centered' | 'anchored'. First to place it in the center of the window, second to place it relative to another HTMLElement as a tooltip.
      */
-    mode: 'centered',
+    mode: 'anchored',
     /**
      * Array of CSS classes or ids to place the container relative to. Only required when mode is set to 'anchored'.
      * If more than one they should be in order of preference, and the first one that is find is the one that will be used.
-     * For example: ['.first-element', '.second-element']
+     * For example: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons']
      */
-    referenceElements: ['.wpml-ls-current-language', '.ast-mobile-menu-buttons'],
+    referenceElements: ['.first-reference-element', '.second-reference-element'],
     /**
      * Optional CSS class to style the button to redirect (HTMLAnchorElement). For example: 'ast-button'.
      */

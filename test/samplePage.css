@@ -6,39 +6,58 @@
 
 body {
   margin: 0;
-  height: 200vh;
+  font-family: sans-serif;
+}
+
+.main-container {
+  margin: auto;
+  max-width: 900px; 
 }
 
 header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 0.5rem;
   position: sticky;
-  top: 0;
-  margin: auto;
-  max-width: 900px;  
+  top: 0; 
   background-color: lightgrey;
+}
+
+.page-title {
+  margin-left: 1rem;
+  font-size: 1.7rem;
+}
+
+main {
+  line-height: 2rem;
+  font-size: 1.2rem;
+  background-color: #f4f4f4;
+  padding: 4rem;
 }
 
 header > span:last-child {
   padding: 0.5rem;
   transition: line-height 1s;
   line-height: 3.5rem;
-  background-color: gray;
+  background-color: #a6a6a6;
 }
 
 header.fixed > span:last-child {
   line-height: 1.5rem;
 }
 
-.test-item {
-  width: 50px;
-  height: 50px;
-  background-color: #c0bfa0;
-  position: absolute;
-  top: 300px;
-  left: 50%;
+.collapsed-menu {
+  display: none;
+  width: 45px;
+  height: 45px;
+  background-color: #a6a6a6;
+  position: fixed;
+  top: 100px;
+  right: 0;
 }
+
+/* Example of a theme button that can be applied to the buttons of the message box. */
 
 .theme-button {
   padding: .3em 1em;
@@ -50,14 +69,22 @@ header.fixed > span:last-child {
 }
 
 .theme-button:hover {
-  padding: .3em 2em .3em .7em;
+  /* padding: .3em 2em .3em .7em; */
   background-color: rgba(0,0,0,.05);
   border: 2px solid transparent;
   border-radius: 0px;
 }
 
-@media (max-width: 550px) {
+@media (max-width: 650px) {
   header > span:last-child {
     display: none;
+  }
+  .page-title {
+    width: 100%;
+    text-align: center;
+    margin-left: 0;
+  }
+  .collapsed-menu {
+    display: block;
   }
 }
