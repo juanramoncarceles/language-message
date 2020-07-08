@@ -34,7 +34,7 @@ Two cookies are stored:
 
 This script takes for granted that all the pages of the site are available in all the languages set in the `languagesData` array. It doesn't check if a page exists, it creates the new url by replacing the language code in the current one.
 
-## TRY IT (TODO Live example ?)
+## TRY IT (TODO live example ?)
 
 Move to the 'test' directory and serve the files. Files should be served instead of just opening them with the browser because the script works by checking the origin and pathname of the url of the page.
 
@@ -54,7 +54,9 @@ At the beginning of the script you will find the `config` object.
 
 ## INSTALLATION
 
-All the logic including the configuration data is in the src/index.js file. Just reference the file in your website.
+All the logic including the configuration data is in the `src/index.js` file.
+
+Just download the file set up the configuration data explained below and reference it the pages where you would like it to be available.
 
 ## CONFIGURATION
 
