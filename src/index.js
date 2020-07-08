@@ -35,7 +35,7 @@
     {
       urlCode: 'it',
       browserCode: 'it',
-      sentence: 'Questa web è disponibile in Italiano',
+      sentence: 'Questa pagina è disponibile in Italiano',
       redirectButton: 'Vedere in Italiano',
       stayButton: 'Rimanere in Italiano',
       remember: 'Non mostrare di nuovo'
@@ -106,7 +106,7 @@
      * Main container styles.
      */
     cssStyle: {
-      backgroundColor: '#f3f3f3',
+      backgroundColor: '#fff',
       borderRadius: '5px',
       zIndex: 98
     },
@@ -257,7 +257,7 @@
    */
   function setButtonBaseStyle(element) {
     element.style.border = '1px solid';
-    element.style.padding = '6px';
+    element.style.padding = '8px 14px';
     element.style.borderRadius = '3px';
   }
   
@@ -295,12 +295,13 @@
     container.appendChild(closeBtn);
     // Sentence.
     const sentence = document.createElement('span');
+    sentence.style.fontSize = '1.3em';
     sentence.textContent = newLangObj.sentence;
     container.appendChild(sentence);
     // Buttons container.
     const buttonsContainer = document.createElement('div');
     buttonsContainer.style.display = 'flex';
-    buttonsContainer.style.marginTop = '10px';
+    buttonsContainer.style.marginTop = '18px';
     if (config.mode === 'anchored') {
       buttonsContainer.style.flexDirection = 'column';
       buttonsContainer.style.alignItems = 'center';
@@ -319,7 +320,7 @@
     if (config.mode === 'anchored') {
       redirectBtn.style.marginBottom = '10px';
     } else {
-      redirectBtn.style.marginRight = '10px';
+      redirectBtn.style.marginRight = '20px';
     }
     if (config.redirectBtnClassName) redirectBtn.classList.add(config.redirectBtnClassName);
     redirectBtn.onclick = () => {
@@ -335,7 +336,7 @@
     const stayBtn = document.createElement('button');
     stayBtn.textContent = pageLangObj.stayButton;
     stayBtn.style.cursor = 'pointer';
-    stayBtn.style.fontSize = 'inherit';
+    stayBtn.style.fontSize = '1.2em';
     // If no CSS class has been provided for the secondary button apply default styles.
     if (!config.stayBtnClassName) {
       setButtonBaseStyle(stayBtn);
@@ -363,7 +364,7 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      padding:32px 14px 14px;
+      padding:35px 20px 20px;
       font-family: sans-serif;
       border-radius:${config.cssStyle.borderRadius};
       background-color:${config.cssStyle.backgroundColor};
@@ -511,6 +512,7 @@
         width: 100vw;
         height: 100vh;
         top: 0;
+        z-index: 100;
         background-color: rgba(128, 128, 128, 0.5);
       `;
       wrapper.onclick = e => {if (e.target === wrapper) removeMessageBox();}
