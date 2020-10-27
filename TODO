@@ -18,6 +18,7 @@
 ☐ Resize obersever only is called if the target element changes its content-box so there are limitations.
 
 
+✔ Added support to cosult the url of the translations from link elements with hreflang attribute in the head of the pages. @done(20-10-27 15:38)
 ✔ Change name to language message box. @done(20-07-03 16:20)
 ✔ Change format to just two buttons: "Ver en Español", "Continue in English", and in both cases? it saves a cookie with the selected option. The cross does nothing, just closes. @done(20-07-01 13:14)
 ✔ Add cookies to not show the tooltip and possibly redirect if the user already made a decision @high @done(20-06-15 13:45)

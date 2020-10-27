@@ -130,7 +130,13 @@
     /**
      * Amount of days the cookies with the language preference data will last.
      */
-    cookieExpirationDays: 30
+    cookieExpirationDays: 30,
+    /**
+     * If the website adds the <link rel="alternate" hreflang="en" href="..." /> to the <header> use them to get the links to the translations.
+     * Be careful, if set to 'true' and no required translation is available no message will be dispayed, so make sure they exist.
+     * If this data is available in the pages it is recommended to use it since it can allow to use translated slugs.
+     */
+    useAlternateHreflang: true,
   }
 
 
@@ -448,6 +454,30 @@
   }
 
 
+  /**
+   * From the current document gets the url to its translated version for the provided language code.
+   * The corresponding <link hreflang=".." /> element should be present in the document otherwise it will return an empty string.
+   * @param {string} langCode A language code as used in the link's hreflang attribute: 'en', 'es', 'it'...
+   */
+  function getUrlFromAlternateHreflang(langCode) {
+    let translationUrl = "";
+    const langsLinks = document.querySelectorAll("link[hreflang]");
+    if (langsLinks.length > 0) {
+      for (let langLink of langsLinks) {
+        if (langLink.hreflang === langCode) {
+          translationUrl = langLink.href;
+          break;
+        }
+      }
+      if (!translationUrl)
+        console.warn(`This document has no <link rel="alternate" hreflang="${langCode}" href=".." /> element for the requested language or its 'href' attribute is invalid.`);
+    } else {
+      console.warn("This document has no <link rel=\"alternate\" hreflang=\"..\" href=\"..\" /> elements so no url could be get.");
+    }
+    return translationUrl;
+  }
+
+
   // Styles for the tooltip arrow.
   // Cannot be inlined since it targets a pseudo element.
   const tipCSSStyleRule = `
@@ -541,8 +571,14 @@
         // If url lang doesnt match with preferredLang redirect.
         if (preferredLangIndex !== urlLangIndex) {
           // Creation of the new url.
-          const newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
-          // Redirection to the new url.
+          let newUrl;
+          if (config.useAlternateHreflang) {
+            newUrl = getUrlFromAlternateHreflang(preferredLang);
+          } else {
+            newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
+          }
+          // Proceed only if there is a valid url to redirect to.
+          if (!newUrl) return;
           // The initial page will not be saved in session History, meaning the user won't be able to use the back button to navigate to it.
           window.location.replace(newUrl);
         }
@@ -550,8 +586,16 @@
     } else if (preferredLang && preferredLangIndex !== -1) {
       // If url lang doesnt match with the saved preferredLang.
       if (preferredLangIndex !== urlLangIndex) {
+        // Creation of the new url.
+        let newUrl;
+        if (config.useAlternateHreflang) {
+          newUrl = getUrlFromAlternateHreflang(preferredLang);
+        } else {
+          newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
+        }
+        // Proceed only if there is a valid url to redirect to.
+        if (!newUrl) return;
         // Get the new lang data.
-        const newUrl = createNewUrl(urlLangIndex, preferredLangIndex);
         const proposedLangObject = languagesData[preferredLangIndex];
         // Assign a reference to the message box HTML element.
         messageBoxContainer = createMessageBox(proposedLangObject, languagesData[urlLangIndex], newUrl);
@@ -563,8 +607,16 @@
       }
       // If url lang doesnt match with the browserLang.
       if (browserLangIndex !== urlLangIndex) {
+        // Creation of the new url.
+        let newUrl;
+        if (config.useAlternateHreflang) {
+          newUrl = getUrlFromAlternateHreflang(languagesData[browserLangIndex].browserCode);
+        } else {
+          newUrl = createNewUrl(urlLangIndex, browserLangIndex);
+        }
+        // Proceed only if there is a valid url to redirect to.
+        if (!newUrl) return;
         // Get the new lang data.
-        const newUrl = createNewUrl(urlLangIndex, browserLangIndex);
         const proposedLangObject = languagesData[browserLangIndex];
         // Assign a reference to the message box HTML element.
         messageBoxContainer = createMessageBox(proposedLangObject, languagesData[urlLangIndex], newUrl);

@@ -36,14 +36,14 @@ This script takes for granted that all the pages of the site are available in al
 
 ## TRY IT (TODO Live example ?)
 
-Move to the 'test' directory and serve the files. Files should be served instead of just opening them with the browser because the script works by checking the origin and pathname of the url of the page.
+Move to the 'test' directory and serve the files. Files should be served instead of just opening them with the browser because the script works by checking the origin and pathname of the url of the page. Port should be 8080.
 
 In the 'test' directory there are four language folders to simulate these urls: /es/index.html, /fr/index.html, /it/index.html and /zh-hans/index.html.
 
-Open `http://localhost/index.html` which corresponds to the default language (English).
+Open `http://localhost:8080/index.html` which corresponds to the default language (English).
 If the browser language is English nothing will happen, but if it is in another language available by the website the message box will appear suggesting it.
 
-Open `http://localhost/zh-hans/index.html` which corresponds to the Chinese website.
+Open `http://localhost:8080/zh-hans/index.html` which corresponds to the Chinese website.
 If the browser is not in Chinese it will suggest to go the browser's language in case it is supported by the website.
 
 Once a decision has been made by clicking one of the two buttons a languge will be saved as preferred and next time it will be used.
@@ -87,6 +87,7 @@ At the beginning of the file there is also the configuration object (`config`).
 - `tooltipDefaultTop` - When mode is 'anchored' this will be the default CSS top position in pixels in case no referenceElement is found.
 - `tooltipDefaultRight` - When mode is 'anchored' this will be the default CSS right position in pixels in case no referenceElement is found.
 - `cookieExpirationDays` - Amount of days the cookies with the language preference data will last.
+- `useAlternateHreflang` - Boolean - If set to true each page is expected to have a link element like &lt;link rel="alternate" hreflang=".." href=".." /&gt; in the &lt;head&gt; for each of the translations for the page, and the url provided in its href will be used to direct to the translation. Note that if set to true but no translation url is found nothing will happen. If translations have different urls because for example they are translated this would be the only way to get them.
 
 ## License
 
