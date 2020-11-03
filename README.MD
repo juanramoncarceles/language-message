@@ -36,9 +36,9 @@ This script takes for granted that all the pages of the site are available in al
 
 ## TRY IT (TODO live example ?)
 
-Move to the 'test' directory and serve the files. Files should be served instead of just opening them with the browser because the script works by checking the origin and pathname of the url of the page. Port should be 8080.
+Move to the 'test-site' directory and serve the files. Files should be served instead of just opening them with the browser because the script works by checking the origin and pathname of the url of the page. Port should be 8080.
 
-In the 'test' directory there are four language folders to simulate these urls: /es/index.html, /fr/index.html, /it/index.html and /zh-hans/index.html.
+In the 'test-site' directory there are four language folders to simulate these urls: /es/index.html, /fr/index.html, /it/index.html and /zh-hans/index.html.
 
 Open `http://localhost:8080/index.html` which corresponds to the default language (English).
 If the browser language is English nothing will happen, but if it is in another language available by the website the message box will appear suggesting it.
