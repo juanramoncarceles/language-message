@@ -289,7 +289,7 @@
     container.classList.add('language-tip');
     // Close button.
     const closeBtn = document.createElement('div');
-    closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;width:0.8em;cursor:pointer;';
+    closeBtn.style.cssText = 'position:absolute;top:15px;right:15px;width:0.9em;cursor:pointer;';
     closeBtn.innerHTML = '<svg viewBox="0 0 15 15" stroke="#585858" stroke-width="2" style="display:block;"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
       const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
@@ -361,8 +361,8 @@
     // Checkbox to don't show again the message box.
     if (config.useDontAskAgainCheckbox) {
       const dontShowAgain = document.createElement('div');
-      dontShowAgain.style.cssText = 'display:flex;align-items:center;margin-top:10px;';
-      dontShowAgain.innerHTML = `<input id="confirm-checkbox" type="checkbox" style="margin: 0 5px 0 0;"><label for="confirm-checkbox">${newLangObj.remember}</label>`;
+      dontShowAgain.style.cssText = 'display:flex;align-items:center;margin-top:18px;font-size:1.2em;';
+      dontShowAgain.innerHTML = `<input id="confirm-checkbox" type="checkbox" style="margin: 0 10px 0 0;"><label for="confirm-checkbox">${newLangObj.remember}</label>`;
       container.appendChild(dontShowAgain);
     }
     // Container css.
@@ -370,7 +370,7 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      padding:35px 20px 20px;
+      padding:45px 25px 25px;
       font-family: sans-serif;
       border-radius:${config.cssStyle.borderRadius};
       background-color:${config.cssStyle.backgroundColor};
