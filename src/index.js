@@ -114,7 +114,7 @@
      * If true message won't show again, and if a language is selected by clicking one of the buttons it will redirect automatically next time.
      * If this is used it is recommended to also save the preferredLang cookie from another place in the website, like buttons to switch the language.
      */
-    useDontAskAgainCheckbox: false,
+    useDontAskAgainCheckbox: true,
     /**
      * When mode is 'anchored' it will appear like a tooltip relative to a referenceElement. This sets the tooltip arrow size in pixels.
      */
