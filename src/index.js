@@ -13,7 +13,7 @@
    * @property {string} sentence First string on the message box. For example: 'This page is available in English'
    * @property {string} redirectButton Text content for the button to redirect. For example: 'View in English'
    * @property {string} stayButton Text content for the button to stay. For example: 'Stay in English'
-   * @property {string} remember Label for the checkbox to don't show again the message box. For example: 'Don't show again'
+   * @property {string} remember Label for the checkbox to don't show again the message box. For example: 'Don't ask again'
    */
   const languagesData = [
     {
@@ -22,7 +22,7 @@
       sentence: 'Esta página está disponible en Español',
       redirectButton: 'Ver en Español',
       stayButton: 'Quedarse en Español',
-      remember: 'No volver a mostrar'
+      remember: 'No volver a preguntar',
     },
     {
       urlCode: 'fr',
@@ -30,7 +30,7 @@
       sentence: 'Cette page est disponible en français',
       redirectButton: 'Voir en Français',
       stayButton: 'Rester dans Français',
-      remember: 'Ne montre plus'
+      remember: 'Ne demandez plus',
     },
     {
       urlCode: 'it',
@@ -38,7 +38,7 @@
       sentence: 'Questa pagina è disponibile in Italiano',
       redirectButton: 'Vedere in Italiano',
       stayButton: 'Rimanere in Italiano',
-      remember: 'Non mostrare di nuovo'
+      remember: 'Non chiedere più',
     },
     // {
     //   urlCode: 'de',
@@ -46,7 +46,7 @@
     //   sentence: 'Diese Seite ist auf Deutsch verfügbar',
     //   redirectButton: 'Ansicht auf Deutsch',
     //   stayButton: 'Bleib auf Deutsch.',
-    //   remember: 'Nicht mehr zeigen'
+    //   remember: 'Nicht mehr fragen.',
     // },
     // {
     //   urlCode: 'ko',
@@ -54,7 +54,7 @@
     //   sentence: '이 페이지는 한국어로 제공됩니다',
     //   redirectButton: '한국어로보기',
     //   stayButton: '한국어로 유지하십시오',
-    //   remember: '다시 표시하지 않습니다'
+    //   remember: '다시 묻지마',
     // },
     {
       urlCode: 'zh-hans',
@@ -62,7 +62,7 @@
       sentence: '此页面有中文版本',
       redirectButton: '用中文查看',
       stayButton: '保持中文',
-      remember: '不再显示'
+      remember: '不要再问了',
     },
     {
       urlCode: '',
@@ -70,7 +70,7 @@
       sentence: 'This page is available in English',
       redirectButton: 'View in English',
       stayButton: 'Stay in English',
-      remember: 'Don\'t show again'
+      remember: 'Don\'t ask again',
     }
   ];
 
