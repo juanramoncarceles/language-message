@@ -13,7 +13,7 @@
    * @property {string} sentence First string on the message box. For example: 'This page is available in English'
    * @property {string} redirectButton Text content for the button to redirect. For example: 'View in English'
    * @property {string} stayButton Text content for the button to stay. For example: 'Stay in English'
-   * @property {string} remember Label for the checkbox to don't show again the message box. For example: 'Don't show again'
+   * @property {string} remember Label for the checkbox to don't show again the message box. For example: 'Don't ask again'
    */
   const languagesData = [
     {
@@ -22,7 +22,7 @@
       sentence: 'Esta página está disponible en Español',
       redirectButton: 'Ver en Español',
       stayButton: 'Quedarse en Español',
-      remember: 'No volver a mostrar'
+      remember: 'No volver a preguntar',
     },
     {
       urlCode: 'fr',
@@ -30,7 +30,7 @@
       sentence: 'Cette page est disponible en français',
       redirectButton: 'Voir en Français',
       stayButton: 'Rester dans Français',
-      remember: 'Ne montre plus'
+      remember: 'Ne demandez plus',
     },
     {
       urlCode: 'it',
@@ -38,7 +38,7 @@
       sentence: 'Questa pagina è disponibile in Italiano',
       redirectButton: 'Vedere in Italiano',
       stayButton: 'Rimanere in Italiano',
-      remember: 'Non mostrare di nuovo'
+      remember: 'Non chiedere più',
     },
     // {
     //   urlCode: 'de',
@@ -46,7 +46,7 @@
     //   sentence: 'Diese Seite ist auf Deutsch verfügbar',
     //   redirectButton: 'Ansicht auf Deutsch',
     //   stayButton: 'Bleib auf Deutsch.',
-    //   remember: 'Nicht mehr zeigen'
+    //   remember: 'Nicht mehr fragen.',
     // },
     // {
     //   urlCode: 'ko',
@@ -54,7 +54,7 @@
     //   sentence: '이 페이지는 한국어로 제공됩니다',
     //   redirectButton: '한국어로보기',
     //   stayButton: '한국어로 유지하십시오',
-    //   remember: '다시 표시하지 않습니다'
+    //   remember: '다시 묻지마',
     // },
     {
       urlCode: 'zh-hans',
@@ -62,7 +62,7 @@
       sentence: '此页面有中文版本',
       redirectButton: '用中文查看',
       stayButton: '保持中文',
-      remember: '不再显示'
+      remember: '不要再问了',
     },
     {
       urlCode: '',
@@ -70,7 +70,7 @@
       sentence: 'This page is available in English',
       redirectButton: 'View in English',
       stayButton: 'Stay in English',
-      remember: 'Don\'t show again'
+      remember: 'Don\'t ask again',
     }
   ];
 
@@ -114,7 +114,7 @@
      * If true message won't show again, and if a language is selected by clicking one of the buttons it will redirect automatically next time.
      * If this is used it is recommended to also save the preferredLang cookie from another place in the website, like buttons to switch the language.
      */
-    useDontAskAgainCheckbox: false,
+    useDontAskAgainCheckbox: true,
     /**
      * When mode is 'anchored' it will appear like a tooltip relative to a referenceElement. This sets the tooltip arrow size in pixels.
      */
@@ -289,7 +289,7 @@
     container.classList.add('language-tip');
     // Close button.
     const closeBtn = document.createElement('div');
-    closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;width:0.8em;cursor:pointer;';
+    closeBtn.style.cssText = 'position:absolute;top:15px;right:15px;width:0.9em;cursor:pointer;';
     closeBtn.innerHTML = '<svg viewBox="0 0 15 15" stroke="#585858" stroke-width="2" style="display:block;"><line x1="0" y1="0" x2="15" y2="15" /><line x1="0" y1="15" x2="15" y2="0" /></svg>';
     closeBtn.onclick = () => {
       const dontAskAgainCheckbox = container.querySelector('#confirm-checkbox');
@@ -361,8 +361,8 @@
     // Checkbox to don't show again the message box.
     if (config.useDontAskAgainCheckbox) {
       const dontShowAgain = document.createElement('div');
-      dontShowAgain.style.cssText = 'display:flex;align-items:center;margin-top:10px;';
-      dontShowAgain.innerHTML = `<input id="confirm-checkbox" type="checkbox" style="margin: 0 5px 0 0;"><label for="confirm-checkbox">${newLangObj.remember}</label>`;
+      dontShowAgain.style.cssText = 'display:flex;align-items:center;margin-top:18px;font-size:1.2em;';
+      dontShowAgain.innerHTML = `<input id="confirm-checkbox" type="checkbox" style="margin: 0 10px 0 0;"><label for="confirm-checkbox">${newLangObj.remember}</label>`;
       container.appendChild(dontShowAgain);
     }
     // Container css.
@@ -370,7 +370,7 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      padding:35px 20px 20px;
+      padding:45px 25px 25px;
       font-family: sans-serif;
       border-radius:${config.cssStyle.borderRadius};
       background-color:${config.cssStyle.backgroundColor};
