@@ -17,7 +17,13 @@
 
 ☐ Resize obersever only is called if the target element changes its content-box so there are limitations.
 
+☐ Add an option to allow two languages, the one in the browser and another of preference. How could this be set in the first place?
+  (Fran dijo) como mejora futura, creo que podríamos hacer lo siguiente
+    He visitado la web en ingles, como entiendo el ingles le he dicho "Stay in english", Luego he ido a una página en francés y correctamente me ha hecho elegir entre francés y el configurado (inglés). Luego he ido a una página en español, y me ha hecho elegir lo mismo (español/inglés), aunque ahí he pensado que, como en el navegador dice que hablo español, quizás no debería mostrarlo. Así sólo saldría la ventana en un idioma que no sea de los dos que entiendo (inglés y español). ¿Qué te parece?
 
+
+DONE:
+✔ 'remember' string changed to "don't ask again", and styled according to the rest of elements. @done(20-11-03 10:08)
 ✔ Added support to cosult the url of the translations from link elements with hreflang attribute in the head of the pages. @done(20-10-27 15:38)
 ✔ Change name to language message box. @done(20-07-03 16:20)
 ✔ Change format to just two buttons: "Ver en Español", "Continue in English", and in both cases? it saves a cookie with the selected option. The cross does nothing, just closes. @done(20-07-01 13:14)
